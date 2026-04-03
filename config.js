@@ -103,10 +103,10 @@ You can use multiple paragraphs separated by a blank line.`,
 
 You can write multiple paragraphs. The text stays on the left, photos scroll to the right.`,
       photos: [
-        { src: "images/DSCF0223.JPG",  caption: "" },
-        { src: "images/DSCF0333.JPG", caption: "" },
-        { src: "images/DSCF0275.JPG", caption: "" },
-        { src: "images/DSCF0379.JPG",  caption: "" } 
+        { src: "images/image_001.JPG",  caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
+        { src: "images/image_003.JPG", caption: "" },
+        { src: "images/image_004.JPG",  caption: "" } 
       ],
     },
     {
@@ -115,10 +115,10 @@ You can write multiple paragraphs. The text stays on the left, photos scroll to 
       layout: "vertical",
       intro: `Introductory text for the second series. The photos are stacked vertically and the page scrolls normally.`,
       photos: [
-        { src: "images/DSCF0223.JPG",  caption: "" },
-        { src: "images/DSCF0333.JPG", caption: "" },
-        { src: "images/DSCF0275.JPG", caption: "" },
-        { src: "images/DSCF0379.JPG",  caption: "" }
+        { src: "images/image_001.JPG",  caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
+        { src: "images/image_003.JPG", caption: "" },
+        { src: "images/image_004.JPG",  caption: "" }
       ],
     },
     {
@@ -128,12 +128,12 @@ You can write multiple paragraphs. The text stays on the left, photos scroll to 
       intro: `Introductory text for the third series.`, 
       rows: [
         [
-          { src: "images/DSCF0223.JPG",  caption: "", h: 780 },
-          { src: "images/DSCF0333.JPG", caption: "", h: 780 }
+          { src: "images/image_001.JPG",  caption: "", h: 780 },
+          { src: "images/image_002.JPG", caption: "", h: 780 }
         ],
         [
-          { src: "images/DSCF0275.JPG", caption: "", h: 780 },
-          { src: "images/DSCF0379.JPG",  caption: "", h: 780 }
+          { src: "images/image_003.JPG", caption: "", h: 780 },
+          { src: "images/image_004.JPG",  caption: "", h: 780 }
         ]
       ],
     },
