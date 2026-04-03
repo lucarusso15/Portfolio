@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Series</title>
+  <link rel="icon" id="site-favicon" href="images/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header data-header></header>
+  <div class="page-body" id="page-body"></div>
+  <script src="config.js"></script>
+  <script src="js/portfolio.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const SERIES_ID = 'series-2';
+      const c = PORTFOLIO_CONFIG;
+      const serie = c.series.find(s => s.id === SERIES_ID);
+      if (!serie) { document.getElementById('page-body').innerHTML = '<p style="padding:3rem;font-size:12px">Series not found.</p>'; return; }
+      document.title = c.photographer.name;
+      buildHeader(serie.id);
+      document.getElementById('page-body').innerHTML = buildSerie(serie);
+    });
+  </script>
+</body>
+</html>

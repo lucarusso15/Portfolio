@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&family=IBM+Plex+Mono:wght@400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #ffffff;
+  --fg:    #000000;
+  --muted: #888888;
+  --font:  'IBM Plex Sans', Helvetica Neue, Arial, sans-serif;
+  --mono:  'IBM Plex Mono', monospace;
+
+  --header-h: 42px;
+
+  /* Set by JS from config.js */
+  --pad:                50px;
+  --content-top-margin: 150px;   /* default; JS overrides via _applyViewportProps */
+  --text-col-w:         200px;
+  --text-margin-right:  40px;
+  --text-margin-bottom: 0px;
+  --photo-h:            780px;
+  --photo-gap:          18px;
+  --fs-nav:             15px;
+  --fs-title:           20px;
+  --fs-body:            14px;
+  --fs-caption:         12px;
+  --fs-info-links:      14px;
+}
+
+html { font-size: 16px; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-weight: 400; line-height: 1.5; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+img { display: block; }
+
+/* ── HEADER ──────────────────────────────────────────────── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--pad);
+  z-index: 100;
+}
+.site-name { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; flex-shrink: 0; }
+.site-name a { color: var(--fg); }
+nav { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
+nav a { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; }
+nav a.active { border-bottom: 1px solid var(--fg); }
+
+/* ── PAGE BODY ───────────────────────────────────────────── */
+.page-body {
+  padding-top: calc(var(--header-h) + var(--content-top-margin));
+  padding-bottom: 4rem;
+}
+
+/* ── TEXT COLUMN ─────────────────────────────────────────── */
+.text-col,
+.text-col-grid,
+.about-text {
+  flex: 0 0 var(--text-col-w);
+  padding-right: var(--text-margin-right);
+  padding-bottom: var(--text-margin-bottom);
+}
+.text-col h1,
+.text-col-grid h1 { font-weight: 700; font-size: var(--fs-title); margin-bottom: 14px; }
+.text-col p,
+.text-col-grid p,
+.about-text p { font-size: var(--fs-body); line-height: 1.6; margin-bottom: 10px; }
+.text-col p:last-child,
+.text-col-grid p:last-child,
+.about-text p:last-child { margin-bottom: 0; }
+
+/* ── HORIZONTAL SERIES ───────────────────────────────────── */
+.series-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+.series-row::-webkit-scrollbar { display: none; }
+
+.photos-horizontal {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: var(--photo-gap);
+}
+.photos-horizontal .photo-wrap { flex: 0 0 auto; }
+.photos-horizontal .photo-wrap img {
+  height: var(--photo-h);
+  /* Prevent photos from ever overflowing the viewport vertically.
+     Works on ALL devices without pointer or JS detection.
+     vh fallback: subtracts 60px for browser chrome that old 100vh ignores.
+     svh (Safari 15.4+, Chrome 108+): always the minimum visible area.
+     max-height is a safety ceiling — on large desktop screens where
+     photo-h is already smaller, these have zero effect. */
+  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px);
+  max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
+  width: auto;
+  max-width: none;
+  display: block;
+  background: #e8e8e8;
+}
+
+/* ── VERTICAL SERIES ─────────────────────────────────────── */
+.series-vertical-wrap {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+.photos-vertical {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--photo-gap);
+}
+.photos-vertical .vertical-photo img {
+  max-width: 100%;
+  background: #e8e8e8;
+  display: block;
+}
+
+/* ── GRID SERIES ─────────────────────────────────────────── */
+.series-grid-wrap {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+.photos-grid {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--photo-gap);
+}
+.grid-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--photo-gap);
+  align-items: flex-start;
+}
+.grid-row .grid-photo { min-width: 0; box-sizing: border-box; }
+
+/* ── SHARED ──────────────────────────────────────────────── */
+.photo-wrap { cursor: default; }
+.photo-caption {
+  font-size: var(--fs-caption);
+  color: var(--muted);
+  margin-top: 5px;
+  font-family: var(--mono);
+}
+
+/* ── ABOUT / INFO ────────────────────────────────────────── */
+
+/* Random quote — centered, shown below the about block */
+.info-quote {
+  width: 100%;
+  padding: 4rem var(--pad) 4rem;
+  text-align: center;
+  font-size: var(--fs-info-quote, 22px);
+  line-height: 1.5;
+}
+
+.about-wrap { display: flex; align-items: flex-start; padding: 0 var(--pad); }
+.about-photo {
+  max-height: var(--photo-h);
+  width: auto;
+  max-width: 100%;
+  background: #e8e8e8;
+}
+.about-links { margin-top: 20px; display: flex; flex-direction: column; gap: 5px; }
+.about-links a { font-size: var(--fs-info-links); font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ─────────────────────────────────────────────────────────
+   pointer: coarse  = touch device (phone or tablet, any size)
+   pointer: fine    = desktop/laptop with mouse (not affected)
+
+   Touch landscape:
+     → top margin 10px, pad 22px
+     → horizontal photos fill viewport height (via min() in base)
+     → vertical photos fill full screen width
+     → grid: text above, 2 photos per row (configurable in future)
+
+   Touch portrait (any size, pointer:coarse):
+     → all layouts stack, text above photos
+     → top margin 10px
+
+   Phone portrait (≤ 640px, fine-grained):
+     → 1 photo per row in grid, compact navbar
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Touch landscape: all phones + tablets in landscape ─── */
+@media (orientation: landscape) and (pointer: coarse) {
+  :root { --pad: 22px; }  /* margin set by JS */
+
+  /* Horizontal layout must not scroll vertically.
+     padding-bottom on .page-body pushes total height beyond viewport. */
+  .page-body { padding-bottom: 0; }
+
+  /* Horizontal photo height is handled in base CSS (min + dvh).
+     --content-top-margin: 10px above gives photos more room on coarse-pointer devices. */
+
+  /* Vertical photos: full screen width (override inline w-fraction) */
+  .photos-vertical .vertical-photo { width: 100% !important; }
+  .photos-vertical .vertical-photo img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Grid: text above; each row keeps its photos side-by-side, scaled to fit width */
+  .series-grid-wrap { flex-direction: column; }
+  .text-col-grid {
+    flex: none; width: 100%;
+    padding-right: 0; padding-bottom: 20px;
+  }
+  /* Each photo in a row shares the width equally (flex: 1 1 0) */
+  .grid-photo {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+  .grid-photo img { width: 100% !important; height: auto !important; }
+}
+
+/* ── Touch portrait: all phones + tablets in portrait ──────── */
+@media (orientation: portrait) and (pointer: coarse) {
+  :root { --pad: 22px; }  /* margin set by JS */
+
+  /* Horizontal → vertical stack */
+  .series-row { flex-direction: column; overflow-x: visible; }
+  .text-col {
+    flex: none; width: 100%;
+    padding-right: 0; padding-bottom: 20px;
+  }
+  .photos-horizontal { flex-direction: column; width: 100%; overflow-x: visible; }
+  .photos-horizontal .photo-wrap { flex: none; width: 100%; }
+  .photos-horizontal .photo-wrap img {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none;
+  }
+
+  /* Vertical → text above, all photos full width */
+  .series-vertical-wrap { flex-direction: column; }
+  .series-vertical-wrap .text-col {
+    flex: none; width: 100%;
+    padding-right: 0; padding-bottom: 20px;
+  }
+  .photos-vertical .vertical-photo { width: 100% !important; }
+  .photos-vertical .vertical-photo img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Grid → text above, 2 photos per row, natural ratio */
+  .series-grid-wrap { flex-direction: column; }
+  .text-col-grid {
+    flex: none; width: 100%;
+    padding-right: 0; padding-bottom: 20px;
+  }
+  .grid-row { flex-wrap: wrap; }
+  .grid-photo {
+    flex: 0 0 calc(50% - var(--photo-gap) / 2) !important;
+    min-width: 0;
+  }
+  .grid-photo img { width: 100% !important; height: auto !important; }
+
+  /* About */
+  .about-wrap { flex-direction: column; gap: 20px; }
+  .about-text { flex: none; width: 100%; padding-right: 0; }
+}
+
+/* ── Portrait ≤ 640px: phone portrait ───────────────────── */
+@media (max-width: 640px) and (orientation: portrait) {
+  :root { --pad: 14px; }
+
+  header { gap: 10px; }
+  .site-name { font-size: 12px; }
+  nav { gap: 10px; }
+  nav a { font-size: 12px; }
+
+  /* Grid: 1 photo per row */
+  .grid-photo { flex: 0 0 100% !important; }
+}
+
+/* ── JS class: touch-landscape (all touch devices in landscape,
+   including fine-pointer like iPad + Apple Pencil that bypass
+   the pointer:coarse media query above) ─────────────────── */
+html.touch-landscape .page-body { padding-bottom: 0; }

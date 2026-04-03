@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Info</title>
+  <link rel="icon" id="site-favicon" href="images/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header data-header></header>
+  <div class="page-body">
+    <div class="about-wrap">
+      <div class="about-text" id="about-text"></div>
+      <div>
+        <img class="about-photo" src="images/portrait.jpg" alt=""
+             onerror="this.style.display='none'">
+      </div>
+    </div>
+    <div class="info-quote" id="info-quote"></div>
+  </div>
+  <script src="config.js"></script>
+  <script src="js/portfolio.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const c = PORTFOLIO_CONFIG;
+      document.title = c.photographer.name;
+      buildHeader('about');
+
+      /* Random quote — shown below the about block */
+      const quotes = c.quotes && c.quotes.length ? c.quotes : [];
+      if (quotes.length) {
+        const q = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('info-quote').textContent = q;
+      }
+
+      /* Bio paragraphs */
+      const paras = c.photographer.bio
+        .split('\n').map(l => l.trim()).filter(Boolean)
+        .map(l => '<p>' + l + '</p>').join('');
+
+      /* Links — new array format + email fallback */
+      const emailHTML = c.photographer.email
+        ? '<a href="mailto:' + c.photographer.email + '">' + c.photographer.email + '</a>'
+        : '';
+
+      const linksHTML = (c.photographer.links || [])
+        .map(l => '<a href="' + l.link + '" target="_blank" rel="noopener">' + (l.displayLink || l.link) + '</a>')
+        .join('');
+
+      document.getElementById('about-text').innerHTML =
+        paras +
+        '<div class="about-links">' + emailHTML + linksHTML + '</div>';
+    });
+  </script>
+</body>
+</html>
