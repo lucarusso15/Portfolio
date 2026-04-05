@@ -86,7 +86,8 @@ You can use multiple paragraphs separated by a blank line.`,
   //   contentAlign: "left"    -- default, content starts from the left
   //   contentAlign: "center"  -- content centered in the page
   //   contentAlign: "right"   -- content pushed to the right
-  //   Only visible when photos have an explicit w narrower than the full page.
+  //   When photos have no explicit w, they use defaults.photoWidth and
+  //   contentAlign positions that column within the page.
   //
   // LAYOUTS
   //   "horizontal" -- photos scroll left to right; text column on the left.
@@ -153,7 +154,7 @@ You can use multiple paragraphs separated by a blank line.`,
           w: 624, 
           paddingLeft: 30,
           paddingRight: 30, 
-          paddingTop:30, 
+          paddingTop: 0, 
           paddingBottom: 30
         },
         { src: "images/image_003.JPG", caption: "" },
@@ -170,95 +171,27 @@ You can use multiple paragraphs separated by a blank line.`,
       layout:   "vertical",
       contentAlign: "center",
 
-      //textColumn: {
-        //content: [
-          //{ text: "Page 2",      style: "pageTitle" },
-          //{ text: "Photos stack vertically.", style: "bodyText" },
-        //],
-      //},
-
       photos: [
-        
         { src: "images/image_001.JPG", caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
         {
           content: [
             { text: "Title", style: "pageTitle" },
-            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }, 
-            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText" },
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText" }
           ],
-          align: "top",
-          h: 500, 
+          align: "center",
           paddingLeft: 30,
-          paddingRight: 30, 
-          paddingTop:30, 
-          paddingBottom: 30
+          paddingRight: 30,
+          paddingTop: 30,
+          paddingBottom: 30,
         },
-        { src: "images/image_002.JPG", caption: "" },
-        // Inline text box example:
-        // {
-        //   content: [{ text: "A note here.", style: "bodyText" }],
-        //   align: "top", w: 0.5, paddingTop: 20,
-        // },
         { src: "images/image_003.JPG", caption: "" },
         { src: "images/image_004.JPG", caption: "" },
-      ],
-    },
-    {
-      id:       "page-3",
-      navLabel: "Page 3",
-      layout:   "grid",
-      contentAlign: "right",
-
-      //textColumn: {
-        //content: [
-          //{ text: "Page 3", style: "pageTitle" },
-          //{ text: "Photos stack vertically.", style: "bodyText" },
-        //],
-      //},
-
-      rows: [
-        [
-          { src: "images/image_001.JPG", caption: "", h: 780 },
-          {
-            content: [
-              { text: "Title", style: "pageTitle" },
-              { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }, 
-              { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }
-            ],
-            align: "top",
-            h: 780, 
-            w: 624,   // 624px fixed width
-            paddingLeft: 30,
-            paddingRight: 30, 
-            paddingTop:0, 
-            paddingBottom: 30
-          },
-          { src: "images/image_002.JPG", caption: "", h: 780 }
-        ],
-        // Inline text box next to a photo:
-        // [
-        //   {
-        //     content: [{ text: "A note.", style: "bodyText" }],
-        //     align: "bottom", w: 0.4, h: 780, paddingLeft: 20,
-        //   },
-        //   { src: "images/image_003.JPG", caption: "", w: 0.6, h: 780 },
-        // ],
-        [
-          { src: "images/image_003.JPG", caption: "", h: 780 },
-          {
-            content: [
-              { text: "", style: "bodyText"  }, 
-            ],
-            align: "top",
-            h: 780, 
-            w: 624,   // 624px fixed width
-            paddingLeft: 30,
-            paddingRight: 30, 
-            paddingTop: 30, 
-            paddingBottom: 30
-          },
-          { src: "images/image_004.JPG", caption: "", h: 780 },
-        ],
+        { src: "images/image_001.JPG", caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
+        { src: "images/image_003.JPG", caption: "" },
+        { src: "images/image_004.JPG", caption: "" },
       ],
     },
   ],

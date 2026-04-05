@@ -4,7 +4,12 @@
    CONSTANTS
    ============================================================ */
 
-const HEADER_H = 42;   /* must match --header-h in style.css */
+/* Read from the DOM at init so it stays in sync with --header-h in CSS. */
+let HEADER_H = 42;
+function _readHeaderHeight() {
+  const header = document.querySelector('header');
+  if (header) HEADER_H = header.getBoundingClientRect().height;
+}
 
 /* ============================================================
    CONFIG HELPERS
@@ -503,16 +508,33 @@ function _scrollToItem(dir) {
   if (!items.length) return;
 
   if (dir === 'down') {
-    const next = items.find(el => el.getBoundingClientRect().top > SNAP + TOL);
+    /* Skip item 0 only if it is already fully visible on load -- i.e. its
+       bottom edge is above the viewport bottom. On short screens where
+       the first photo is taller than the available space, don't skip it. */
+    const firstBottom   = items[0].getBoundingClientRect().bottom;
+    const firstVisible  = firstBottom < window.innerHeight - TOL;
+    const searchFrom    = firstVisible ? 1 : 0;
+    const next = items.slice(searchFrom).find(el => el.getBoundingClientRect().top > SNAP + TOL);
     if (next) {
       window.scrollTo({ top: window.scrollY + next.getBoundingClientRect().top - SNAP, behavior: 'smooth' });
     }
   } else {
-    const prev = [...items].reverse().find(el => el.getBoundingClientRect().top < SNAP - TOL);
-    if (prev) {
-      window.scrollTo({ top: window.scrollY + prev.getBoundingClientRect().top - SNAP, behavior: 'smooth' });
-    } else {
+    /* Find the item whose top is closest to SNAP -- that is the one
+       currently visible at the top of the content area.
+       Then go one item back. If we land on index 0, scroll to top
+       so contentTopMargin + item 0 are shown together. */
+    const snapped = items.reduce((closest, el) => {
+      const dist   = Math.abs(el.getBoundingClientRect().top - SNAP);
+      const cdist  = Math.abs(closest.getBoundingClientRect().top - SNAP);
+      return dist < cdist ? el : closest;
+    });
+    const snappedIdx = items.indexOf(snapped);
+
+    if (snappedIdx <= 1) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const target = items[snappedIdx - 1];
+      window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - SNAP, behavior: 'smooth' });
     }
   }
 }
@@ -522,6 +544,7 @@ function _scrollToItem(dir) {
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  _readHeaderHeight();
   applyLayoutSettings();
   _initKeyboard();
 });

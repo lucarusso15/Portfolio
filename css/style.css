@@ -153,11 +153,13 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
-  flex: 1 1 0;
+  /* flex: 0 1 auto -- shrinks if needed but does not grow beyond natural width,
+     so justify-content on the parent wrapper can actually shift it. */
+  flex: 0 1 auto;
   min-width: 0;
 }
 .photos-vertical {
-  flex: 1 1 0;
+  flex: 0 1 auto;  /* shrinks to content width so contentAlign can position it */
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -190,11 +192,12 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
-  flex: 1 1 0;
+  /* flex: 0 1 auto -- same rationale as .vertical-inner */
+  flex: 0 1 auto;
   min-width: 0;
 }
 .photos-grid {
-  flex: 1 1 0;
+  flex: 0 1 auto;  /* shrinks to content width so contentAlign can position it */
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -227,21 +230,27 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
 /* ============================================================
    TEXT BOX
    Inline text element inside the photo sequence.
-   Height and position styles are injected inline by JS.
+   In horizontal layout: fixed height to align with adjacent photos.
+   In vertical / grid layout: height is auto (fits content).
+   Width, padding and justify-content are injected inline by JS.
    ============================================================ */
 
 .text-box {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  height: var(--photo-h);
-  max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
-  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px); /* fallback */
+  height: auto;            /* vertical / grid: shrinks to content */
   font-family: var(--font);
   line-height: 1.6;
   color: var(--fg);
   background: transparent;
   overflow: hidden;
+}
+/* Horizontal layout only: match the height of adjacent photos */
+.photos-horizontal .text-box {
+  height: var(--photo-h);
+  max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
+  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px); /* fallback */
 }
 .text-box-inner {
   display: flex;
