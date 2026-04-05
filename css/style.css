@@ -15,7 +15,7 @@
   --font:  'IBM Plex Sans', Helvetica Neue, Arial, sans-serif;
   --mono:  'IBM Plex Mono', monospace;
 
-  --header-h:           42px;   /* fixed -- must match HEADER_H in portfolio.js */
+  --header-h:           55px;   /* fixed -- must match HEADER_H in portfolio.js */
 
   /* Overridden by JS via applyLayoutSettings() */
   --pad:                50px;
@@ -66,7 +66,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--pad);
+  padding: 20px var(--pad);
   z-index: 100;
 }
 .site-name        { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; flex-shrink: 0; }
@@ -112,12 +112,19 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
 .page-row {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: flex-start; /* overridden by contentAlign classes below */
+  /* min-height needed so align-items center/bottom has space to work */
+  min-height: calc(100svh - var(--header-h) - var(--content-top-margin));
+  min-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px); /* fallback */
 }
+/* contentAlign on horizontal pages: aligns all items vertically */
+.page-row.align-top    { align-items: flex-start; }
+.page-row.align-center { align-items: center; }
+.page-row.align-bottom { align-items: flex-end; }
 .photos-horizontal {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: inherit; /* inherits from .page-row so all items align consistently */
   gap: var(--photo-gap);
 }
 .photos-horizontal .photo-wrap { flex: 0 0 auto; }

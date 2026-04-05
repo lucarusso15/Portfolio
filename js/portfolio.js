@@ -5,7 +5,7 @@
    ============================================================ */
 
 /* Read from the DOM at init so it stays in sync with --header-h in CSS. */
-let HEADER_H = 42;
+let HEADER_H = 55;
 function _readHeaderHeight() {
   const header = document.querySelector('header');
   if (header) HEADER_H = header.getBoundingClientRect().height;
@@ -73,7 +73,7 @@ function _applyViewportVars() {
   root.setProperty('--photo-h', defaults.photoHeight + 'px');
   root.setProperty(
     '--content-top-margin',
-    isTouch ? '20px' : (layout.contentTopMargin ?? 150) + 'px'
+    isTouch ? '20px' : (layout.contentTopMargin ?? 0) + 'px'
   );
 }
 
@@ -235,8 +235,15 @@ function _widthCSS(rw, defaults) {
   return `width:${(rw.value * 100).toFixed(2)}%; max-width:100%;`;
 }
 
-/* CSS class for contentAlign page property. */
-function _alignClass(contentAlign) {
+/* CSS class for contentAlign page property.
+   Horizontal: "top" | "center" | "bottom"  (vertical alignment of items)
+   Vertical / Grid: "left" | "center" | "right"  (horizontal alignment of block) */
+function _alignClass(contentAlign, layout) {
+  if (layout === 'horizontal') {
+    if (contentAlign === 'center') return 'align-center';
+    if (contentAlign === 'bottom') return 'align-bottom';
+    return 'align-top';
+  }
   if (contentAlign === 'center') return 'align-center';
   if (contentAlign === 'right')  return 'align-right';
   return 'align-left';
@@ -269,6 +276,7 @@ function buildHorizontalPage(page) {
 
   const defaults    = getDefaults();
   const textColHTML = _buildTextColumn(page, 'text-col');
+  const alignClass  = _alignClass(page.contentAlign, 'horizontal');
 
   const itemsHTML = page.photos.map(item => {
     const marginCSS = _marginStyle(item, defaults);
@@ -292,7 +300,7 @@ function buildHorizontalPage(page) {
 
   return `
     <div class="page-row-outer">
-      <div class="page-row">
+      <div class="page-row ${alignClass}">
         ${textColHTML}
         <div class="photos-horizontal">${itemsHTML}</div>
       </div>
@@ -309,7 +317,7 @@ function buildHorizontalPage(page) {
 function buildVerticalPage(page) {
   const defaults    = getDefaults();
   const textColHTML = _buildTextColumn(page, 'text-col');
-  const alignClass  = _alignClass(page.contentAlign);
+  const alignClass  = _alignClass(page.contentAlign, 'vertical');
 
   const itemsHTML = page.photos.map(item => {
     const marginCSS = _marginStyle(item, defaults);
@@ -354,7 +362,7 @@ function buildVerticalPage(page) {
 function buildGridPage(page) {
   const rowsHTML    = (page.rows || []).map(buildGridRow).join('');
   const textColHTML = _buildTextColumn(page, 'text-col-grid');
-  const alignClass  = _alignClass(page.contentAlign);
+  const alignClass  = _alignClass(page.contentAlign, 'grid');
 
   return `
     <div class="page-grid-wrap ${alignClass}">

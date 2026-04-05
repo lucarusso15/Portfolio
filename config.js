@@ -28,7 +28,7 @@ You can use multiple paragraphs separated by a blank line.`,
 
   // -- PAGE LAYOUT ----------------------------------------------
   layout: {
-    contentTopMargin: 150,   // space between the navbar and the content (px)
+    contentTopMargin: 0,     // space between the navbar and the content (px)
     pageSidePadding:  50,    // left/right outer padding of every page (px)
 
     textColumnWidth:  200,   // default width of the left text column (px)
@@ -82,12 +82,17 @@ You can use multiple paragraphs separated by a blank line.`,
   //
   // navLabel  -- text shown in the navigation bar for this page.
   //
-  // CONTENT ALIGNMENT (vertical and grid only)
-  //   contentAlign: "left"    -- default, content starts from the left
-  //   contentAlign: "center"  -- content centered in the page
-  //   contentAlign: "right"   -- content pushed to the right
-  //   When photos have no explicit w, they use defaults.photoWidth and
-  //   contentAlign positions that column within the page.
+  // CONTENT ALIGNMENT
+  //   Horizontal layout -- controls vertical alignment of items:
+  //     contentAlign: "top"     -- default, items align to the top
+  //     contentAlign: "center"  -- items centered vertically
+  //     contentAlign: "bottom"  -- items align to the bottom
+  //
+  //   Vertical and grid layouts -- controls horizontal position of the block:
+  //     contentAlign: "left"    -- default, content starts from the left
+  //     contentAlign: "center"  -- content centered in the page
+  //     contentAlign: "right"   -- content pushed to the right
+  //     When photos have no explicit w, they use defaults.photoWidth.
   //
   // LAYOUTS
   //   "horizontal" -- photos scroll left to right; text column on the left.
@@ -128,6 +133,7 @@ You can use multiple paragraphs separated by a blank line.`,
       id:       "page-1",
       navLabel: "Page 1",
       layout:   "horizontal",
+      contentAlign: "center",
 
       //textColumn: {
         //content: [
@@ -172,8 +178,6 @@ You can use multiple paragraphs separated by a blank line.`,
       contentAlign: "center",
 
       photos: [
-        { src: "images/image_001.JPG", caption: "" },
-        { src: "images/image_002.JPG", caption: "" },
         {
           content: [
             { text: "Title", style: "pageTitle" },
@@ -183,9 +187,11 @@ You can use multiple paragraphs separated by a blank line.`,
           align: "center",
           paddingLeft: 30,
           paddingRight: 30,
-          paddingTop: 30,
+          paddingTop: 0,
           paddingBottom: 30,
         },
+        { src: "images/image_001.JPG", caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
         { src: "images/image_003.JPG", caption: "" },
         { src: "images/image_004.JPG", caption: "" },
         { src: "images/image_001.JPG", caption: "" },
