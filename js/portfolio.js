@@ -46,12 +46,12 @@ function applyLayoutSettings() {
   root.setProperty('--photo-gap', defaults.photoGap + 'px');
 
   const fontSize = layout.fontSize || {};
-  if (fontSize.navLinks   !== undefined) root.setProperty('--fs-nav',        fontSize.navLinks   + 'px');
-  if (fontSize.pageTitle  !== undefined) root.setProperty('--fs-title',      fontSize.pageTitle  + 'px');
-  if (fontSize.bodyText   !== undefined) root.setProperty('--fs-body',       fontSize.bodyText   + 'px');
+  if (fontSize.navLinks   !== undefined) root.setProperty('--fs-navLinks',   fontSize.navLinks   + 'px');
+  if (fontSize.pageTitle  !== undefined) root.setProperty('--fs-pageTitle',  fontSize.pageTitle  + 'px');
+  if (fontSize.bodyText   !== undefined) root.setProperty('--fs-bodyText',   fontSize.bodyText   + 'px');
   if (fontSize.caption    !== undefined) root.setProperty('--fs-caption',    fontSize.caption    + 'px');
-  if (fontSize.infoLinks  !== undefined) root.setProperty('--fs-info-links', fontSize.infoLinks  + 'px');
-  if (fontSize.infoQuote  !== undefined) root.setProperty('--fs-info-quote', fontSize.infoQuote  + 'px');
+  if (fontSize.infoLinks  !== undefined) root.setProperty('--fs-infoLinks',  fontSize.infoLinks  + 'px');
+  if (fontSize.infoQuote  !== undefined) root.setProperty('--fs-infoQuote',  fontSize.infoQuote  + 'px');
 
   _applyViewportVars();
   window.addEventListener('resize', _applyViewportVars);
@@ -99,7 +99,7 @@ function buildHeader(activePage) {
   const el     = document.querySelector('[data-header]');
   if (!el) return;
 
-  if (config.photographer.favicon) {
+  if (config.info.favicon) {
     let fav = document.getElementById('site-favicon');
     if (!fav) {
       fav     = document.createElement('link');
@@ -107,11 +107,11 @@ function buildHeader(activePage) {
       fav.id  = 'site-favicon';
       document.head.appendChild(fav);
     }
-    fav.href = config.photographer.favicon;
+    fav.href = config.info.favicon;
   }
 
   const pageLinks = config.pages.map((page, i) => {
-    const href      = i === 0 ? 'index.html' : page.id + '.html';
+    const href       = i === 0 ? 'index.html' : page.id + '.html';
     const activeAttr = activePage === page.id ? ' class="active"' : '';
     return `<a href="${href}"${activeAttr}>${page.navLabel}</a>`;
   });
@@ -120,7 +120,7 @@ function buildHeader(activePage) {
   );
 
   el.innerHTML = `
-    <div class="site-name"><a href="index.html">${config.photographer.name}</a></div>
+    <div class="site-name"><a href="index.html">${config.info.name}</a></div>
     <nav>${pageLinks.join('')}</nav>`;
 }
 
@@ -171,29 +171,30 @@ function buildTextBox(item, defaults, extraStyle) {
 
 /* ============================================================
    CONTENT BLOCK RENDERER
-   Shared by buildTextBox() and _buildTextColumn().
+   Shared by buildTextBox(), _buildTextColumn(), and about.html.
    Each block: { text, style, bold? }
-     style: "pageTitle" | "bodyText" | "caption" | "navLinks"
+     style: any key from layout.fontSize in config.js
+            e.g. pageTitle, bodyText, caption, navLinks, infoLinks, infoQuote
      pageTitle is always bold; bold: true forces bold on any style.
-   ============================================================ */
 
-const FONT_SIZE_VARS = {
-  pageTitle: 'var(--fs-title)',
-  bodyText:  'var(--fs-body)',
-  caption:   'var(--fs-caption)',
-  navLinks:  'var(--fs-nav)',
-};
+   CSS variable naming convention: --fs-{style}
+   e.g. pageTitle -> --fs-pageTitle, bodyText -> --fs-bodyText
+   This mirrors the config key directly -- no mapping table needed.
+   ============================================================ */
 
 function _renderContentBlocks(blocks) {
   return blocks.map(block => {
-    const sizeVar  = FONT_SIZE_VARS[block.style] || FONT_SIZE_VARS.bodyText;
-    const isBold   = block.style === 'pageTitle' || block.bold === true;
+    /* CSS var name mirrors the config key: pageTitle -> --fs-pageTitle.
+       No mapping table needed -- config.js is the single source of truth. */
+    const style     = block.style || 'bodyText';
+    const cssVar    = `--fs-${style}`;
+    const isBold    = block.style === 'pageTitle' || block.bold === true;
     const weightCSS = isBold ? 'font-weight:700;' : 'font-weight:400;';
     const linesHTML = (block.text || '')
       .split('\n')
       .map(line => `<span>${line}</span>`)
       .join('<br>');
-    return `<div class="text-box-block" style="font-size:${sizeVar};${weightCSS}">${linesHTML}</div>`;
+    return `<div class="text-box-block" style="font-size:var(${cssVar});${weightCSS}">${linesHTML}</div>`;
   }).join('');
 }
 

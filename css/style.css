@@ -19,18 +19,18 @@
 
   /* Overridden by JS via applyLayoutSettings() */
   --pad:                50px;
-  --content-top-margin: 150px;
+  --content-top-margin: 0px;
   --text-col-w:         200px;
   --text-margin-right:  40px;
   --text-margin-bottom: 0px;
   --photo-h:            780px;
   --photo-gap:          10px;
-  --fs-nav:             15px;
-  --fs-title:           20px;
-  --fs-body:            14px;
+  --fs-navLinks:        15px;
+  --fs-pageTitle:       20px;
+  --fs-bodyText:        14px;
   --fs-caption:         12px;
-  --fs-info-links:      14px;
-  --fs-info-quote:      14px;
+  --fs-infoLinks:       14px;
+  --fs-infoQuote:       14px;
 }
 
 /* ============================================================
@@ -69,10 +69,10 @@ header {
   padding: 20px var(--pad);
   z-index: 100;
 }
-.site-name        { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; flex-shrink: 0; }
+.site-name        { font-weight: 700; font-size: var(--fs-navLinks); white-space: nowrap; flex-shrink: 0; }
 .site-name a      { color: var(--fg); }
 nav               { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
-nav a             { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; }
+nav a             { font-weight: 700; font-size: var(--fs-navLinks); white-space: nowrap; }
 nav a.active      { border-bottom: 1px solid var(--fg); }
 
 /* ============================================================
@@ -84,6 +84,9 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
   padding-top: calc(var(--header-h) + var(--content-top-margin));
   padding-bottom: 4rem;
 }
+/* No bottom padding on horizontal pages -- min-height on .page-row
+   already fills the viewport; extra padding would cause vertical overflow. */
+html.layout-horizontal .page-body { padding-bottom: 0; }
 
 /* ============================================================
    TEXT COLUMN
@@ -274,7 +277,7 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
   width: 100%;
   padding: 4rem var(--pad);
   text-align: center;
-  font-size: var(--fs-info-quote);
+  font-size: var(--fs-infoQuote);
   line-height: 1.5;
 }
 .about-wrap {
@@ -289,7 +292,7 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
   background: #e8e8e8;
 }
 .about-links { margin-top: 20px; display: flex; flex-direction: column; gap: 5px; }
-.about-links a { font-size: var(--fs-info-links); font-weight: 700; }
+.about-links a { font-size: var(--fs-infoLinks); font-weight: 700; }
 
 /* ============================================================
    RESPONSIVE — TOUCH DEVICES

@@ -15,7 +15,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const page = PORTFOLIO_CONFIG.pages[0];
-      document.title = PORTFOLIO_CONFIG.photographer.name;
+      document.title = PORTFOLIO_CONFIG.info.name;
       buildHeader(page.id);
       document.getElementById('page-body').innerHTML = buildPage(page);
     });

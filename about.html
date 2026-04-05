@@ -23,33 +23,39 @@
   <script src="js/portfolio.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const c = PORTFOLIO_CONFIG;
-      document.title = c.photographer.name;
+      const c    = PORTFOLIO_CONFIG;
+      const info = c.info;
+      document.title = info.name;
       buildHeader('about');
 
-      /* Random quote — shown below the about block */
-      const quotes = c.quotes && c.quotes.length ? c.quotes : [];
+      /* Random quote -- rendered with _renderContentBlocks() so style and bold work */
+      const quotes = info.quotes && info.quotes.length ? info.quotes : [];
       if (quotes.length) {
-        const q = quotes[Math.floor(Math.random() * quotes.length)];
-        document.getElementById('info-quote').textContent = q;
+        const q       = quotes[Math.floor(Math.random() * quotes.length)];
+        const quoteEl = document.getElementById('info-quote');
+        quoteEl.innerHTML = _renderContentBlocks([q]);
       }
 
-      /* Bio paragraphs */
-      const paras = c.photographer.bio
-        .split('\n').map(l => l.trim()).filter(Boolean)
-        .map(l => '<p>' + l + '</p>').join('');
+      /* Bio -- rendered with _renderContentBlocks(), same as photo pages.
+         padding* and margin* on the info object apply to the wrapper div,
+         same convention as inline text boxes in photo pages. */
+      const defaults = getDefaults();
+      const padCSS   = _paddingStyle(info, defaults);
+      const margCSS  = _marginStyle(info, defaults);
+      const bioHTML  = _renderContentBlocks(info.content || []);
 
-      /* Links — new array format + email fallback */
-      const emailHTML = c.photographer.email
-        ? '<a href="mailto:' + c.photographer.email + '">' + c.photographer.email + '</a>'
+      /* Links */
+      const emailHTML = info.email
+        ? '<a href="mailto:' + info.email + '">' + info.email + '</a>'
         : '';
-
-      const linksHTML = (c.photographer.links || [])
+      const linksHTML = (info.links || [])
         .map(l => '<a href="' + l.link + '" target="_blank" rel="noopener">' + (l.displayLink || l.link) + '</a>')
         .join('');
 
+      const wrapperStyle = [padCSS, margCSS].filter(Boolean).join(' ');
+
       document.getElementById('about-text').innerHTML =
-        paras +
+        '<div class="text-box-inner" style="' + wrapperStyle + '">' + bioHTML + '</div>' +
         '<div class="about-links">' + emailHTML + linksHTML + '</div>';
     });
   </script>

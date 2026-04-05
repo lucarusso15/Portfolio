@@ -6,15 +6,27 @@
  */
 const PORTFOLIO_CONFIG = {
 
-  // -- PERSONAL INFO --------------------------------------------
-  photographer: {
+  // -- INFO PAGE ------------------------------------------------
+  info: {
     name:    "Luca Russo",
     city:    "Bologna, Italy",
     favicon: "images/favicon.png",
 
-    bio: `Write your bio here. Talk about your work and your photographic vision.
+    // Bio text shown on the info page.
+    // Uses the same content block format as text boxes and text columns:
+    //   { text: "...", style: "bodyText" | "pageTitle" | "caption" | "infoQuote" | ... }
+    //   bold: true forces bold on any style. pageTitle is always bold.
+    content: [
+      { text: "Write your bio here. Talk about your work and your photographic vision.", style: "bodyText" },
+      { text: "You can use multiple blocks to separate paragraphs.", style: "bodyText" },
+    ],
 
-You can use multiple paragraphs separated by a blank line.`,
+    // Quotes shown randomly below the bio. Leave empty [] to hide.
+    // Each quote uses the same content block format as bio content.
+    quotes: [
+      { text: "Ciao.",         style: "infoQuote", bold: true },
+      { text: "Ciao.",        style: "infoQuote", bold: true }, 
+    ],
 
     // email uses mailto: -- leave "" to hide it.
     // Each link entry: label (config-only), displayLink (shown), link (full URL).
@@ -24,6 +36,8 @@ You can use multiple paragraphs separated by a blank line.`,
       { label: "YouTube",   displayLink: "Youtube",   link: "https://www.youtube.com/@lucarusso15" },
       // { label: "Website", displayLink: "lucarusso.com", link: "https://lucarusso.com" },
     ],
+
+    marginTop: 50
   },
 
   // -- PAGE LAYOUT ----------------------------------------------
@@ -43,7 +57,7 @@ You can use multiple paragraphs separated by a blank line.`,
       bodyText:  14,   // style: "bodyText"
       caption:   12,   // style: "caption"
       infoLinks: 14,
-      infoQuote: 14,
+      infoQuote: 20,
     },
   },
 
@@ -67,14 +81,6 @@ You can use multiple paragraphs separated by a blank line.`,
     paddingLeft:   0,
     paddingRight:  0,
   },
-
-  // -- INFO PAGE QUOTES -----------------------------------------
-  quotes: [
-    "Photography is the art of frozen time.",
-    "Light is the photographer's paintbrush.",
-    "Every photograph is a certificate of presence.",
-    "A photograph is a secret about a secret.",
-  ],
 
   // -- PHOTO PAGES ----------------------------------------------
   // The FIRST entry is the home page (index.html).
@@ -117,8 +123,8 @@ You can use multiple paragraphs separated by a blank line.`,
   //   textColumn: (omitted) | {}
   //     No content -- column is hidden (same as false).
   //
-  // CONTENT BLOCKS (used in textColumn.content and inline text boxes)
-  //   { text: "...", style: "pageTitle" | "bodyText" | "caption" | "navLinks" }
+  // CONTENT BLOCKS (used in textColumn.content, inline text boxes, and info.content)
+  //   { text: "...", style: "pageTitle" | "bodyText" | "caption" | "navLinks" | "infoLinks" | "infoQuote" }
   //   style maps to layout.fontSize values. pageTitle is always bold.
   //   Add bold: true to force bold on any other style.
   //   Use \n for line breaks within a block.
