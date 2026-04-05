@@ -124,7 +124,10 @@ content: [
 | `navLabel` | string | Text shown in the navigation bar. |
 | `id` | string | Page identifier -- must match the HTML filename (`page-2` -> `page-2.html`). |
 | `layout` | string | `"horizontal"` / `"vertical"` / `"grid"` |
-| `textColumn` | object / false | Left column configuration (see below). |
+| `photosPosition` | string | `"right"` (default) / `"left"` -- vertical and grid only. Swaps photos and text column. On touch, column always stacks above. |
+| `contentAlign` | string | `"left"` (default) / `"center"` / `"right"` -- vertical and grid only. Aligns the entire text+photos block. Only visible when `contentWidth` is also set. |
+| `contentWidth` | px | — | Max width of the entire text+photos block. Without this, the block fills the available width. |
+| `textColumn` | object / false | Left/right column configuration (see below). |
 
 ---
 
@@ -191,7 +194,7 @@ photos: [
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `w` | 0-1 | 1 | Width as fraction of photos column |
+| `w` | 0-1 or px | `photoWidth` | Width. `<= 1` = fraction of column; `> 1` = px |
 | `h` | px | auto | Height in px -- crops the image |
 | `marginTop/Bottom/Left/Right` | px | from `defaults` | Outer spacing |
 
@@ -214,11 +217,12 @@ rows: [
 | Properties set | Behaviour |
 |---|---|
 | `h` only | Fixed height, width auto -- no crop |
-| `w` only | Fills `w` fraction of row, height auto -- no crop |
-| `h` + `w` | Fills `w` fraction, cropped to `h` |
-| neither | Equal share, height auto -- no crop |
+| `w <= 1` only | Fills that fraction of the row, height auto |
+| `w > 1` only | Fixed px width, height auto |
+| `w` + `h` | Fixed width, cropped to `h` |
+| neither | Equal share of remaining space, height auto |
 
-`w` is 0-1 (`0.5` = 50%, `0.33` = 33%).
+`w <= 1` is a fraction (`0.5` = 50%, `0.33` = 33%). `w > 1` is pixels (`300` = 300px fixed).
 
 ---
 

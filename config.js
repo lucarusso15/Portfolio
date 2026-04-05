@@ -82,10 +82,23 @@ You can use multiple paragraphs separated by a blank line.`,
   //
   // navLabel  -- text shown in the navigation bar for this page.
   //
+  // CONTENT ALIGNMENT (vertical and grid only)
+  //   contentAlign: "left"    -- default, content starts from the left
+  //   contentAlign: "center"  -- content centered in the page
+  //   contentAlign: "right"   -- content pushed to the right
+  //   Only visible when photos have an explicit w narrower than the full page.
+  //
   // LAYOUTS
   //   "horizontal" -- photos scroll left to right; text column on the left.
   //   "vertical"   -- photos stack top to bottom; text column on the left.
   //   "grid"       -- photos in explicit rows;     text column on the left.
+  //
+  // W PROPERTY
+  //   In vertical and grid layouts, w accepts both pixels and fractions:
+  //     w <= 1  fraction of available space  (e.g. 0.5 = 50% of column/row)
+  //     w >  1  explicit pixel width         (e.g. 300 = 300px fixed)
+  //   In horizontal layout, w on text boxes is always px.
+  //   Omitting w: photos use defaults.photoWidth (vertical) or share equally (grid).
   //
   // TEXT COLUMN
   //   textColumn: false
@@ -132,12 +145,12 @@ You can use multiple paragraphs separated by a blank line.`,
         // Inline text box example -- remove // to activate:
         {
           content: [
-            { text: "Page 1",         style: "pageTitle" },
-            { text: "Introductory text here.", style: "bodyText"  },
-            { text: "Describe the project.", style: "bodyText"   },
+            { text: "Title", style: "pageTitle" },
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }, 
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }
           ],
           align: "top",
-          w: 200, 
+          w: 624, 
           paddingLeft: 30,
           paddingRight: 30, 
           paddingTop:30, 
@@ -145,22 +158,41 @@ You can use multiple paragraphs separated by a blank line.`,
         },
         { src: "images/image_003.JPG", caption: "" },
         { src: "images/image_004.JPG", caption: "" },
+        { src: "images/image_001.JPG", caption: "" },
+        { src: "images/image_002.JPG", caption: "" },
+        { src: "images/image_003.JPG", caption: "" },
+        { src: "images/image_004.JPG", caption: ""},
       ],
     },
     {
       id:       "page-2",
       navLabel: "Page 2",
       layout:   "vertical",
+      contentAlign: "center",
 
-      textColumn: {
-        content: [
-          { text: "Page 2",      style: "pageTitle" },
-          { text: "Photos stack vertically.", style: "bodyText" },
-        ],
-      },
+      //textColumn: {
+        //content: [
+          //{ text: "Page 2",      style: "pageTitle" },
+          //{ text: "Photos stack vertically.", style: "bodyText" },
+        //],
+      //},
 
       photos: [
+        
         { src: "images/image_001.JPG", caption: "" },
+        {
+          content: [
+            { text: "Title", style: "pageTitle" },
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }, 
+            { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }
+          ],
+          align: "top",
+          h: 500, 
+          paddingLeft: 30,
+          paddingRight: 30, 
+          paddingTop:30, 
+          paddingBottom: 30
+        },
         { src: "images/image_002.JPG", caption: "" },
         // Inline text box example:
         // {
@@ -175,18 +207,33 @@ You can use multiple paragraphs separated by a blank line.`,
       id:       "page-3",
       navLabel: "Page 3",
       layout:   "grid",
+      contentAlign: "right",
 
-      textColumn: {
-        content: [
-          { text: "Page 3", style: "pageTitle" },
-          { text: "Photos stack vertically.", style: "bodyText" },
-        ],
-      },
+      //textColumn: {
+        //content: [
+          //{ text: "Page 3", style: "pageTitle" },
+          //{ text: "Photos stack vertically.", style: "bodyText" },
+        //],
+      //},
 
       rows: [
         [
           { src: "images/image_001.JPG", caption: "", h: 780 },
-          { src: "images/image_002.JPG", caption: "", h: 780 },
+          {
+            content: [
+              { text: "Title", style: "pageTitle" },
+              { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }, 
+              { text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.", style: "bodyText"  }
+            ],
+            align: "top",
+            h: 780, 
+            w: 624,   // 624px fixed width
+            paddingLeft: 30,
+            paddingRight: 30, 
+            paddingTop:0, 
+            paddingBottom: 30
+          },
+          { src: "images/image_002.JPG", caption: "", h: 780 }
         ],
         // Inline text box next to a photo:
         // [
@@ -198,6 +245,18 @@ You can use multiple paragraphs separated by a blank line.`,
         // ],
         [
           { src: "images/image_003.JPG", caption: "", h: 780 },
+          {
+            content: [
+              { text: "", style: "bodyText"  }, 
+            ],
+            align: "top",
+            h: 780, 
+            w: 624,   // 624px fixed width
+            paddingLeft: 30,
+            paddingRight: 30, 
+            paddingTop: 30, 
+            paddingBottom: 30
+          },
           { src: "images/image_004.JPG", caption: "", h: 780 },
         ],
       ],

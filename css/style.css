@@ -2,6 +2,12 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ============================================================
+   DESIGN TOKENS
+   All values set here are overridden by JS from config.js,
+   except --header-h which is a fixed layout constant.
+   ============================================================ */
+
 :root {
   --bg:    #ffffff;
   --fg:    #000000;
@@ -9,29 +15,49 @@
   --font:  'IBM Plex Sans', Helvetica Neue, Arial, sans-serif;
   --mono:  'IBM Plex Mono', monospace;
 
-  --header-h: 42px;
+  --header-h:           42px;   /* fixed -- must match HEADER_H in portfolio.js */
 
-  /* Set by JS from config.js */
+  /* Overridden by JS via applyLayoutSettings() */
   --pad:                50px;
-  --content-top-margin: 150px;   /* default; JS overrides via _applyViewportProps */
+  --content-top-margin: 150px;
   --text-col-w:         200px;
   --text-margin-right:  40px;
   --text-margin-bottom: 0px;
   --photo-h:            780px;
-  --photo-gap:          18px;
+  --photo-gap:          10px;
   --fs-nav:             15px;
   --fs-title:           20px;
   --fs-body:            14px;
   --fs-caption:         12px;
   --fs-info-links:      14px;
+  --fs-info-quote:      14px;
 }
 
+/* ============================================================
+   BASE
+   ============================================================ */
+
 html { font-size: 16px; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font); font-weight: 400; line-height: 1.5; overflow-x: hidden; }
-a { color: inherit; text-decoration: none; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.5;
+  /* Horizontal scroll is enabled only on horizontal-layout pages.
+     JS adds .layout-horizontal to <html> to switch between the two. */
+}
+html.layout-horizontal body         { overflow-x: auto; }
+html:not(.layout-horizontal) body   { overflow-x: hidden; }
+
+a   { color: inherit; text-decoration: none; }
 img { display: block; }
 
-/* -- HEADER ------------------------------------------------- */
+/* ============================================================
+   HEADER
+   Fixed across all pages.
+   ============================================================ */
+
 header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -43,28 +69,29 @@ header {
   padding: 0 var(--pad);
   z-index: 100;
 }
-.site-name { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; flex-shrink: 0; }
-.site-name a { color: var(--fg); }
-nav { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
-nav a { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; }
-nav a.active { border-bottom: 1px solid var(--fg); }
+.site-name        { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; flex-shrink: 0; }
+.site-name a      { color: var(--fg); }
+nav               { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
+nav a             { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; }
+nav a.active      { border-bottom: 1px solid var(--fg); }
 
-/* -- PAGE BODY ---------------------------------------------- */
+/* ============================================================
+   PAGE BODY
+   Top padding makes room for the fixed header + config margin.
+   ============================================================ */
+
 .page-body {
   padding-top: calc(var(--header-h) + var(--content-top-margin));
   padding-bottom: 4rem;
 }
 
-/* -- TEXT COLUMN --------------------------------------------
- * The text column (title + intro) is rendered only when
- * page.textColumn !== false. When absent, photos fill the
- * full available width automatically because the flex
- * container has no fixed-width child on the left.
- *
- * Per-page overrides (width, paddingRight, paddingBottom,
- * showTitle, showIntro) are handled in _buildTextColumn()
- * in portfolio.js and injected as inline styles.
- */
+/* ============================================================
+   TEXT COLUMN
+   Left column rendered by _buildTextColumn().
+   Used in horizontal (.text-col) and grid (.text-col-grid) pages.
+   Geometry overrides are injected inline by JS.
+   ============================================================ */
+
 .text-col,
 .text-col-grid,
 .about-text {
@@ -72,29 +99,21 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   padding-right: var(--text-margin-right);
   padding-bottom: var(--text-margin-bottom);
 }
-.text-col h1,
-.text-col-grid h1 { font-weight: 700; font-size: var(--fs-title); margin-bottom: 14px; }
-.text-col p,
-.text-col-grid p,
-.about-text p { font-size: var(--fs-body); line-height: 1.6; margin-bottom: 10px; }
-.text-col p:last-child,
-.text-col-grid p:last-child,
-.about-text p:last-child { margin-bottom: 0; }
 
-/* -- HORIZONTAL PAGE ---------------------------------------- */
+/* ============================================================
+   HORIZONTAL PAGE
+   Body scrolls left to right (see overflow rule above).
+   ============================================================ */
+
+.page-row-outer {
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
 .page-row {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
-  overflow-x: auto;
-  overflow-y: visible;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-left: var(--pad);
-  padding-right: var(--pad);
 }
-.page-row::-webkit-scrollbar { display: none; }
-
 .photos-horizontal {
   display: flex;
   flex-wrap: nowrap;
@@ -104,24 +123,38 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .photos-horizontal .photo-wrap { flex: 0 0 auto; }
 .photos-horizontal .photo-wrap img {
   height: var(--photo-h);
-  /* Prevent photos from overflowing the viewport vertically on all devices.
-     vh fallback: subtracts 60px for browser chrome that old 100vh ignores.
-     svh (Safari 15.4+, Chrome 108+): always the minimum visible area. */
-  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px);
+  /* Cap to actual visible area -- h in config is a desired maximum */
   max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
+  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px); /* fallback */
   width: auto;
-  max-width: none;
+  max-width: 90vw; /* prevent a single portrait image from spanning the full viewport */
   display: block;
   background: #e8e8e8;
 }
 
-/* -- VERTICAL PAGE ------------------------------------------ */
+/* ============================================================
+   VERTICAL PAGE
+   ============================================================ */
+
 .page-vertical-wrap {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
   padding-left: var(--pad);
   padding-right: var(--pad);
+}
+/* contentAlign shifts the inner block within the page width.
+   Only visible when photos have an explicit w narrower than 100%. */
+.page-vertical-wrap.align-left   { justify-content: flex-start; }
+.page-vertical-wrap.align-center { justify-content: center; }
+.page-vertical-wrap.align-right  { justify-content: flex-end; }
+
+.vertical-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .photos-vertical {
   flex: 1 1 0;
@@ -132,17 +165,33 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 }
 .photos-vertical .vertical-photo img {
   max-width: 100%;
+  max-height: calc(100svh - var(--header-h) - 20px);
+  max-height: calc(100vh  - var(--header-h) - 80px); /* fallback */
   background: #e8e8e8;
   display: block;
 }
 
-/* -- GRID PAGE ---------------------------------------------- */
+/* ============================================================
+   GRID PAGE
+   ============================================================ */
+
 .page-grid-wrap {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
   padding-left: var(--pad);
   padding-right: var(--pad);
+}
+.page-grid-wrap.align-left   { justify-content: flex-start; }
+.page-grid-wrap.align-center { justify-content: center; }
+.page-grid-wrap.align-right  { justify-content: flex-end; }
+
+.grid-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .photos-grid {
   flex: 1 1 0;
@@ -158,8 +207,15 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   align-items: flex-start;
 }
 .grid-row .grid-photo { min-width: 0; box-sizing: border-box; }
+.grid-photo img {
+  max-height: calc(100svh - var(--header-h) - 20px);
+  max-height: calc(100vh  - var(--header-h) - 80px); /* fallback */
+}
 
-/* -- SHARED ------------------------------------------------- */
+/* ============================================================
+   SHARED PHOTO / CAPTION
+   ============================================================ */
+
 .photo-wrap { cursor: default; }
 .photo-caption {
   font-size: var(--fs-caption);
@@ -168,19 +224,19 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   font-family: var(--mono);
 }
 
-/* -- TEXT BOX -----------------------------------------------
- * Inline text element that lives in the photo sequence.
- * No border, no background -- naked text on the page colour.
- * Height matches surrounding photos via var(--photo-h)
- * unless overridden inline (h property in config).
- * Vertical alignment (justify-content) and padding are
- * injected inline by buildTextBox() in portfolio.js.
- */
+/* ============================================================
+   TEXT BOX
+   Inline text element inside the photo sequence.
+   Height and position styles are injected inline by JS.
+   ============================================================ */
+
 .text-box {
-  flex: 0 0 auto;          /* horizontal layout: don't stretch */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  height: var(--photo-h);  /* overridden inline if h is set per-item */
+  height: var(--photo-h);
+  max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
+  max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px); /* fallback */
   font-family: var(--font);
   line-height: 1.6;
   color: var(--fg);
@@ -190,25 +246,26 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .text-box-inner {
   display: flex;
   flex-direction: column;
-  gap: 6px;                /* vertical spacing between content blocks */
-}
-.text-box-block {
-  /* font-size and font-weight are set inline per block */
+  gap: 6px;
 }
 .text-box-block span { display: block; }
 
-/* -- ABOUT / INFO ------------------------------------------- */
+/* ============================================================
+   ABOUT / INFO PAGE
+   ============================================================ */
 
-/* Random quote -- centered, shown below the about block */
 .info-quote {
   width: 100%;
   padding: 4rem var(--pad);
   text-align: center;
-  font-size: var(--fs-info-quote, 22px);
+  font-size: var(--fs-info-quote);
   line-height: 1.5;
 }
-
-.about-wrap { display: flex; align-items: flex-start; padding: 0 var(--pad); }
+.about-wrap {
+  display: flex;
+  align-items: flex-start;
+  padding: 0 var(--pad);
+}
 .about-photo {
   max-height: var(--photo-h);
   width: auto;
@@ -219,79 +276,67 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .about-links a { font-size: var(--fs-info-links); font-weight: 700; }
 
 /* ============================================================
-   RESPONSIVE
-   ------------------------------------------------------------
-   pointer: coarse  = touch device (phone or tablet, any size)
-   pointer: fine    = desktop/laptop with mouse (not affected)
+   RESPONSIVE — TOUCH DEVICES
+   All touch devices (phone and tablet, any orientation) collapse
+   to a simple vertical stack: text column above, photos full width.
+   No distinction between portrait and landscape.
 
-   Touch landscape:
-     -> top margin 10px, pad 22px
-     -> horizontal photos fill viewport height
-     -> vertical photos fill full screen width
-     -> grid: text above, 2 items per row
-
-   Touch portrait (any size, pointer:coarse):
-     -> all layouts stack, text column above photos
-     -> top margin 10px
-
-   Phone portrait (<= 640px):
-     -> 1 item per row in grid, compact navbar
+   Detection:
+     pointer: coarse  — CSS, catches most touch screens
+     html.is-touch    — JS class for iPad + Apple Pencil
+                        (pointer: fine but maxTouchPoints > 0)
    ============================================================ */
 
-/* -- Touch landscape: all phones + tablets in landscape ----- */
-@media (orientation: landscape) and (pointer: coarse) {
-  :root { --pad: 22px; }  /* top margin set by JS */
+@media (pointer: coarse) {
+  :root { --pad: 22px; --content-top-margin: 20px; }
 
-  /* Horizontal layout must not scroll vertically */
-  .page-body { padding-bottom: 0; }
+  header { gap: 10px; }
+  .site-name { font-size: 13px; }
+  nav { gap: 14px; }
+  nav a { font-size: 13px; }
 
-  /* Vertical photos: full screen width */
-  .photos-vertical .vertical-photo { width: 100% !important; }
-  .photos-vertical .vertical-photo img { width: 100% !important; height: auto !important; }
-  /* Vertical text boxes: full screen width */
-  .photos-vertical .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
-
-  /* Grid: text column above; rows stay side-by-side */
-  .page-grid-wrap { flex-direction: column; }
-  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
-  /* Each photo/text-box in a row shares width equally */
-  .grid-photo,
-  .grid-row .text-box { flex: 1 1 0 !important; min-width: 0 !important; }
-  .grid-photo img { width: 100% !important; height: auto !important; }
-  .grid-row .text-box { width: 100% !important; }
-}
-
-/* -- Touch portrait: all phones + tablets in portrait ------- */
-@media (orientation: portrait) and (pointer: coarse) {
-  :root { --pad: 22px; }  /* top margin set by JS */
+  .page-body { padding-bottom: 2rem; }
 
   /* Horizontal -> vertical stack */
+  html.layout-horizontal body { overflow-x: hidden; }
   .page-row { flex-direction: column; overflow-x: visible; }
-  .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
+  .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
   .photos-horizontal { flex-direction: column; width: 100%; overflow-x: visible; }
   .photos-horizontal .photo-wrap { flex: none; width: 100%; }
-  .photos-horizontal .photo-wrap img { width: 100% !important; height: auto !important; max-width: none; }
-  /* Horizontal text boxes: full width, auto height */
-  .photos-horizontal .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
+  .photos-horizontal .photo-wrap img {
+    width: 100% !important; height: auto !important;
+    max-width: none; max-height: none;
+  }
+  .photos-horizontal .text-box {
+    width: 100% !important; height: auto !important;
+    max-height: none; min-height: 60px;
+  }
 
-  /* Vertical -> text column above, all photos full width */
-  .page-vertical-wrap { flex-direction: column; }
-  .page-vertical-wrap .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
+  /* Vertical -> text above, photos full width */
+  .page-vertical-wrap { flex-direction: column; justify-content: flex-start !important; }
+  .vertical-inner { flex-direction: column; width: 100%; flex: none; }
+  .page-vertical-wrap .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
+  .photos-vertical { flex: none; width: 100%; }
   .photos-vertical .vertical-photo { width: 100% !important; }
-  .photos-vertical .vertical-photo img { width: 100% !important; height: auto !important; }
-  /* Vertical text boxes: full width */
-  .photos-vertical .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
+  .photos-vertical .vertical-photo img {
+    width: 100% !important; height: auto !important; max-height: none;
+  }
+  .photos-vertical .text-box {
+    width: 100% !important; height: auto !important;
+    max-height: none; min-height: 60px;
+  }
 
-  /* Grid -> text column above, 2 items per row */
-  .page-grid-wrap { flex-direction: column; }
-  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
+  /* Grid -> text above, 2 items per row */
+  .page-grid-wrap { flex-direction: column; justify-content: flex-start !important; }
+  .grid-inner { flex-direction: column; width: 100%; flex: none; }
+  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
   .grid-row { flex-wrap: wrap; }
   .grid-photo { flex: 0 0 calc(50% - var(--photo-gap) / 2) !important; min-width: 0; }
-  .grid-photo img { width: 100% !important; height: auto !important; }
-  /* Grid text boxes in portrait: 50% like photos */
+  .grid-photo img { width: 100% !important; height: auto !important; max-height: none; }
   .grid-row .text-box {
     flex: 0 0 calc(50% - var(--photo-gap) / 2) !important;
-    width: auto !important; height: auto !important; min-height: 80px;
+    width: auto !important; height: auto !important;
+    max-height: none; min-height: 60px;
   }
 
   /* About */
@@ -299,22 +344,26 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   .about-text { flex: none; width: 100%; padding-right: 0; }
 }
 
-/* -- Portrait <= 640px: phone portrait ---------------------- */
-@media (max-width: 640px) and (orientation: portrait) {
+/* Phone: single-column grid, tighter padding */
+@media (pointer: coarse) and (max-width: 600px) {
   :root { --pad: 14px; }
-
-  header { gap: 10px; }
   .site-name { font-size: 12px; }
   nav { gap: 10px; }
   nav a { font-size: 12px; }
-
-  /* Grid: 1 item per row */
   .grid-photo { flex: 0 0 100% !important; }
-  .grid-row .text-box { flex: 0 0 100% !important; width: auto !important; }
+  .grid-row .text-box { flex: 0 0 100% !important; }
 }
 
-/* -- JS class: touch-landscape ------------------------------
- * Covers fine-pointer touch devices (iPad + Apple Pencil)
- * that bypass the pointer:coarse media query above.
- */
-html.touch-landscape .page-body { padding-bottom: 0; }
+/* iPad + Apple Pencil: pointer is fine but screen is touch */
+html.is-touch .page-body { padding-bottom: 2rem; }
+html.is-touch .page-row { flex-direction: column; overflow-x: visible; }
+html.is-touch .photos-horizontal { flex-direction: column; width: 100%; }
+html.is-touch .photos-horizontal .photo-wrap { flex: none; width: 100%; }
+html.is-touch .photos-horizontal .photo-wrap img { width: 100% !important; height: auto !important; max-height: none; }
+html.is-touch .page-vertical-wrap { flex-direction: column; }
+html.is-touch .vertical-inner { flex-direction: column; width: 100%; }
+html.is-touch .photos-vertical .vertical-photo img { width: 100% !important; height: auto !important; max-height: none; }
+html.is-touch .page-grid-wrap { flex-direction: column; }
+html.is-touch .grid-inner { flex-direction: column; width: 100%; }
+html.is-touch .grid-photo { flex: 0 0 calc(50% - var(--photo-gap) / 2) !important; }
+html.is-touch .grid-photo img { width: 100% !important; height: auto !important; max-height: none; }
