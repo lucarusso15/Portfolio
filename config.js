@@ -115,30 +115,34 @@ You can use multiple paragraphs separated by a blank line.`,
       navLabel: "Page 1",
       layout:   "horizontal",
 
-      textColumn: {
-        content: [
-          { text: "Page 1",                style: "pageTitle" },
-          { text: "Introductory text here.\nDescribe the project.", style: "bodyText" },
-          { text: "Test caption", style: "caption" },
-        ],
+      //textColumn: {
+        //content: [
+          //{ text: "Page 1",                style: "pageTitle" },
+          //{ text: "Introductory text here.\nDescribe the project.", style: "bodyText" },
+          //{ text: "Test caption", style: "caption" },
+        //],
         // width:         200,   // override column width for this page (px)
         // paddingRight:   40,   // override gap between column and photos (px)
         // paddingBottom:   0,   // override bottom spacing (px)
-      },
+      //},
 
       photos: [
         { src: "images/image_001.JPG", caption: "" },
         { src: "images/image_002.JPG", caption: "" },
         // Inline text box example -- remove // to activate:
-        // {
-        //   content: [
-        //     { text: "A title",         style: "pageTitle" },
-        //     { text: "Body text\nhere.", style: "bodyText"  },
-        //     { text: "A note.",         style: "caption"   },
-        //   ],
-        //   align: "center",
-        //   w: 250, paddingLeft: 30, paddingRight: 30,
-        // },
+        {
+          content: [
+            { text: "Page 1",         style: "pageTitle" },
+            { text: "Introductory text here.", style: "bodyText"  },
+            { text: "Describe the project.", style: "bodyText"   },
+          ],
+          align: "top",
+          w: 200, 
+          paddingLeft: 30,
+          paddingRight: 30, 
+          paddingTop:30, 
+          paddingBottom: 30
+        },
         { src: "images/image_003.JPG", caption: "" },
         { src: "images/image_004.JPG", caption: "" },
       ],
@@ -175,6 +179,7 @@ You can use multiple paragraphs separated by a blank line.`,
       textColumn: {
         content: [
           { text: "Page 3", style: "pageTitle" },
+          { text: "Photos stack vertically.", style: "bodyText" },
         ],
       },
 

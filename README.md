@@ -259,6 +259,36 @@ text box -- no border, no background, naked text in the photo flow.
 
 ---
 
+## Responsive behaviour
+
+The site adapts to three scenarios, detected at runtime by JavaScript and CSS.
+
+**Desktop / laptop** (mouse, any screen width)
+
+The text column sits fixed on the left. Photos have the full configured top margin (`layout.contentTopMargin`, default 150px). Each layout works as designed: horizontal scrolls left-to-right, vertical scrolls normally, grid respects the rows you defined.
+
+**Touch portrait** -- phone or tablet held upright
+
+Detected via `pointer: coarse` (CSS) and `navigator.maxTouchPoints > 0` (JS). Top margin reduces to 10px. The text column moves above the photos at full width. All three layouts collapse to a vertical single-column flow:
+- Horizontal: photos stack top-to-bottom, full width, height auto (the `h` value is ignored).
+- Vertical: identical to desktop but without the fixed left column.
+- Grid: 2 photos per row (flex-wrap). On phones with width ≤ 640px: 1 photo per row.
+
+Inline text boxes become full-width with auto height (min 80px).
+
+**Touch landscape** -- phone or tablet held sideways
+
+Detected via `pointer: coarse` + `orientation: landscape` (CSS), plus a JS class `touch-landscape` on `<html>` that catches iPads with Apple Pencil (which report `pointer: fine` despite being touch devices). Top margin is 10px.
+- Horizontal: text column stays left. Photo height is calculated by JS as `window.innerHeight - header - 10px` so they fill the visible viewport exactly with no vertical scroll and no overflow.
+- Vertical: text column moves above, photos fill full screen width (the `w` fraction is overridden).
+- Grid: text column moves above, rows stay side-by-side with `flex: 1 1 0` so each item takes an equal share of the width.
+
+**Navbar**
+
+Fixed at the top on all devices, always 42px tall. On phones ≤ 640px portrait the font shrinks to 12px and nav link gaps tighten to prevent overflow.
+
+---
+
 ## Adding a new page
 
 1. Add an entry to `pages` in `config.js`
