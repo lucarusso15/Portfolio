@@ -6,14 +6,13 @@
  */
 const PORTFOLIO_CONFIG = {
 
-  // -- INFO PAGE ------------------------------------------------
-  info: {
+  // -- ABOUT PAGE -----------------------------------------------
+  about: {
     name:    "Luca Russo",
-    city:    "Bologna, Italy",
     favicon: "images/favicon.png",
 
-    // Bio text shown on the info page.
-    // Uses the same content block format as text boxes and text columns:
+    // Bio text shown on the about page.
+    // Uses the same content block format as inline text boxes:
     //   { text: "...", style: "bodyText" | "pageTitle" | "caption" | "infoQuote" | ... }
     //   bold: true forces bold on any style. pageTitle is always bold.
     content: [
@@ -24,8 +23,8 @@ const PORTFOLIO_CONFIG = {
     // Quotes shown randomly below the bio. Leave empty [] to hide.
     // Each quote uses the same content block format as bio content.
     quotes: [
-      { text: "Ciao.",         style: "infoQuote", bold: true },
-      { text: "Ciao.",        style: "infoQuote", bold: true }, 
+      { text: "Ciao.", style: "infoQuote", bold: true },
+      { text: "Ciao.", style: "infoQuote", bold: true },
     ],
 
     // email uses mailto: -- leave "" to hide it.
@@ -37,17 +36,13 @@ const PORTFOLIO_CONFIG = {
       // { label: "Website", displayLink: "lucarusso.com", link: "https://lucarusso.com" },
     ],
 
-    marginTop: 50
+    marginTop: 50,
   },
 
   // -- PAGE LAYOUT ----------------------------------------------
   layout: {
     contentTopMargin: 0,     // space between the navbar and the content (px)
     pageSidePadding:  50,    // left/right outer padding of every page (px)
-
-    textColumnWidth:  200,   // default width of the left text column (px)
-    textMarginRight:  40,    // default space between text column and photos (px)
-    textMarginBottom: 0,     // default space below the text block (px)
 
     // Font sizes used across the site.
     // These names are also used as the "style" value in content blocks.
@@ -101,9 +96,12 @@ const PORTFOLIO_CONFIG = {
   //     When photos have no explicit w, they use defaults.photoWidth.
   //
   // LAYOUTS
-  //   "horizontal" -- photos scroll left to right; text column on the left.
-  //   "vertical"   -- photos stack top to bottom; text column on the left.
-  //   "grid"       -- photos in explicit rows;     text column on the left.
+  //   "horizontal" -- photos scroll left to right.
+  //   "vertical"   -- photos stack top to bottom.
+  //   "grid"       -- photos in explicit rows.
+  //
+  // MAX WIDTH (grid only)
+  //   maxWidth: 1400   -- caps the grid width in px; omit for full-width.
   //
   // W PROPERTY
   //   In vertical and grid layouts, w accepts both pixels and fractions:
@@ -112,18 +110,9 @@ const PORTFOLIO_CONFIG = {
   //   In horizontal layout, w on text boxes is always px.
   //   Omitting w: photos use defaults.photoWidth (vertical) or share equally (grid).
   //
-  // TEXT COLUMN
-  //   textColumn: false
-  //     Hides the column. Photos fill the full width from the left edge.
+  // TEXT COLUMN -- removed. Use inline text boxes in the photo/row sequence instead.
   //
-  //   textColumn: { content: [...], width?, paddingRight?, paddingBottom? }
-  //     Renders a content block array in the left column.
-  //     width / paddingRight / paddingBottom override the global defaults.
-  //
-  //   textColumn: (omitted) | {}
-  //     No content -- column is hidden (same as false).
-  //
-  // CONTENT BLOCKS (used in textColumn.content, inline text boxes, and info.content)
+  // CONTENT BLOCKS (used in inline text boxes and about.content)
   //   { text: "...", style: "pageTitle" | "bodyText" | "caption" | "navLinks" | "infoLinks" | "infoQuote" }
   //   style maps to layout.fontSize values. pageTitle is always bold.
   //   Add bold: true to force bold on any other style.
@@ -140,17 +129,6 @@ const PORTFOLIO_CONFIG = {
       navLabel: "Page 1",
       layout:   "horizontal",
       contentAlign: "center",
-
-      //textColumn: {
-        //content: [
-          //{ text: "Page 1",                style: "pageTitle" },
-          //{ text: "Introductory text here.\nDescribe the project.", style: "bodyText" },
-          //{ text: "Test caption", style: "caption" },
-        //],
-        // width:         200,   // override column width for this page (px)
-        // paddingRight:   40,   // override gap between column and photos (px)
-        // paddingBottom:   0,   // override bottom spacing (px)
-      //},
 
       photos: [
         { src: "images/image_001.JPG", caption: "" },
@@ -204,6 +182,169 @@ const PORTFOLIO_CONFIG = {
         { src: "images/image_002.JPG", caption: "" },
         { src: "images/image_003.JPG", caption: "" },
         { src: "images/image_004.JPG", caption: "" },
+      ],
+    },
+    {
+      id:       "page-3",
+      navLabel: "Page 3",
+      layout:   "grid",
+      contentAlign: "center",
+
+      rows: [
+        [
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+        ],
+        [
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_002.JPG", caption: "" },
+          { src: "images/image_003.JPG", caption: "" },
+          { src: "images/image_001.JPG", caption: "" },
+          { src: "images/image_004.JPG", caption: "" },
+        ],
       ],
     },
   ],

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
+  <title>Page</title>
   <link rel="icon" id="site-favicon" href="images/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,8 +14,11 @@
   <script src="js/portfolio.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const page = PORTFOLIO_CONFIG.pages[0];
-      document.title = PORTFOLIO_CONFIG.about.name;
+      const PAGE_ID = 'page-3';
+      const c = PORTFOLIO_CONFIG;
+      const page = c.pages.find(p => p.id === PAGE_ID);
+      if (!page) { document.getElementById('page-body').innerHTML = '<p style="padding:3rem;font-size:12px">Page not found.</p>'; return; }
+      document.title = c.about.name;
       buildHeader(page.id);
       document.getElementById('page-body').innerHTML = buildPage(page);
     });

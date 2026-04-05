@@ -1,6 +1,6 @@
 # Portfolio
 
-A minimal static portfolio site -- no server, no build tools, no dependencies.
+A minimal static photography portfolio -- no server, no build tools, no dependencies.
 Works on any static host (Netlify, Vercel, Cloudflare Pages, shared hosting, etc.).
 
 ---
@@ -9,17 +9,17 @@ Works on any static host (Netlify, Vercel, Cloudflare Pages, shared hosting, etc
 
 ```
 portfolio/
-├── index.html       <- Home = Page 1
-├── page-2.html      <- Page 2
-├── page-3.html      <- Page 3  (duplicate for more)
-├── about.html       <- Info / Bio page
-├── config.js        <- EDIT THIS -- all configuration lives here
+├── index.html        <- Home = Page 1
+├── page-2.html       <- Page 2
+├── page-3.html       <- Page 3 (duplicate for more pages)
+├── about.html        <- About / Bio page
+├── config.js         <- EDIT THIS -- all configuration lives here
 ├── css/style.css
 ├── js/portfolio.js
 └── images/
-    ├── favicon.png     <- Browser tab icon (replace freely)
-    ├── portrait.jpg    <- Your portrait on the Info page (optional)
-    └── ...             <- Your photos go here
+    ├── favicon.png      <- Browser tab icon
+    ├── portrait.jpg     <- Portrait photo on the About page (optional)
+    └── ...              <- Your photos go here
 ```
 
 ---
@@ -28,23 +28,37 @@ portfolio/
 
 ```
 PORTFOLIO_CONFIG
-├── photographer  -- name, bio, favicon, email, links[]
-├── layout        -- page structure, text column defaults, font sizes
-├── defaults      -- photo height/width, gap, margins, paddings
-├── quotes        -- random phrases shown on the Info page
-└── pages         -- your photo pages, each with layout + photos/rows
+├── about    -- name, favicon, bio content, quotes, email, links
+├── layout   -- padding, font sizes
+├── defaults -- photo dimensions, gap, margins, paddings
+└── pages    -- your photo pages, each with layout + photos/rows
 ```
 
 ---
 
-## `photographer` -- personal info
+## `about` -- personal info and about page content
 
 ```js
-photographer: {
+about: {
   name:    "Your Name",
   favicon: "images/favicon.png",
-  bio:     `Your bio. Separate paragraphs with a blank line.`,
-  email:   "",   // mailto: link -- leave "" to hide
+
+  // Bio rendered on the about page. Uses content blocks (see below).
+  content: [
+    { text: "Your bio.", style: "bodyText" },
+    { text: "Second paragraph.", style: "bodyText" },
+  ],
+
+  // Random quote shown below the bio. Leave [] to hide.
+  quotes: [
+    { text: "A quote.", style: "infoQuote" },
+  ],
+
+  // padding* and margin* control spacing of the bio block on the about page.
+  paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0,
+  marginTop:  0, marginBottom:  0, marginLeft:  0, marginRight:  0,
+
+  email: "",   // mailto: link -- leave "" to hide
   links: [
     { label: "Instagram", displayLink: "@handle", link: "https://instagram.com/handle" },
   ],
@@ -57,11 +71,8 @@ photographer: {
 
 ```js
 layout: {
-  contentTopMargin: 150,  // space between navbar and content (px) -- desktop only
-  pageSidePadding:  50,   // left/right outer padding (px)
-  textColumnWidth:  200,  // default left column width (px)
-  textMarginRight:  40,   // default gap between column and photos (px)
-  textMarginBottom: 0,    // default bottom spacing of column (px)
+  contentTopMargin: 0,   // space between navbar and content (px)
+  pageSidePadding: 50,   // left/right outer padding (px)
 
   // Font sizes -- also used as "style" values in content blocks.
   fontSize: {
@@ -70,7 +81,7 @@ layout: {
     bodyText:  14,   // style: "bodyText"
     caption:   12,   // style: "caption"
     infoLinks: 14,
-    infoQuote: 22,
+    infoQuote: 14,
   },
 },
 ```
@@ -99,11 +110,11 @@ defaults: {
 
 ## Content blocks
 
-Both the text column and inline text boxes use the same **content block** format:
+Content blocks are used in inline text boxes (`photos` / `rows`) and in `about.content` / `about.quotes`.
 
 ```js
 content: [
-  { text: "Page title",         style: "pageTitle" },  // bold
+  { text: "Page title",         style: "pageTitle" },  // always bold
   { text: "Body text.\nLine 2", style: "bodyText"  },
   { text: "A small note.",      style: "caption"   },
 ]
@@ -111,9 +122,11 @@ content: [
 
 | Property | Values | Default | Description |
 |---|---|---|---|
-| `text` | string | required | Text to display. Use `\n` for line breaks within a block. |
-| `style` | `pageTitle` / `bodyText` / `caption` / `navLinks` | `bodyText` | Maps to `layout.fontSize`. `pageTitle` is always bold. |
-| `bold` | true / false | false | Force bold weight on any style. |
+| `text` | string | required | Text. Use `\n` for line breaks within a block. |
+| `style` | `pageTitle` / `bodyText` / `caption` / `navLinks` / `infoLinks` / `infoQuote` | `bodyText` | Maps to `layout.fontSize`. `pageTitle` is always bold. |
+| `bold` | true / false | false | Force bold on any style. |
+
+CSS variable convention: each style maps to `--fs-{style}` (e.g. `pageTitle` → `--fs-pageTitle`). Adding a new key to `layout.fontSize` makes it available as a style automatically.
 
 ---
 
@@ -121,52 +134,21 @@ content: [
 
 | Property | Type | Description |
 |---|---|---|
+| `id` | string | Must match the HTML filename (`page-2` → `page-2.html`). |
 | `navLabel` | string | Text shown in the navigation bar. |
-| `id` | string | Page identifier -- must match the HTML filename (`page-2` -> `page-2.html`). |
 | `layout` | string | `"horizontal"` / `"vertical"` / `"grid"` |
-| `photosPosition` | string | `"right"` (default) / `"left"` -- vertical and grid only. Swaps photos and text column. On touch, column always stacks above. |
-| `contentAlign` | string | `"left"` (default) / `"center"` / `"right"` -- vertical and grid only. Aligns the entire text+photos block. Only visible when `contentWidth` is also set. |
-| `contentWidth` | px | — | Max width of the entire text+photos block. Without this, the block fills the available width. |
-| `textColumn` | object / false | Left/right column configuration (see below). |
-
----
-
-## Text column (left column per page)
-
-Each page has a left column. Control it with `textColumn`.
-
-**Hide the column** -- photos fill the full width from the left edge:
-```js
-textColumn: false
-```
-
-**Structured content** -- full control using content blocks:
-```js
-textColumn: {
-  content: [
-    { text: "Page title",   style: "pageTitle" },
-    { text: "Description.", style: "bodyText"  },
-    { text: "A note.",      style: "caption"   },
-  ],
-  width:         200,   // override column width for this page (px)
-  paddingRight:   40,   // override gap between column and photos (px)
-  paddingBottom:   0,   // override bottom spacing (px)
-}
-```
-
-**No column** (omit `textColumn` or `{}` without `content`):
-Column is hidden -- same as `false`.
+| `contentAlign` | string | Horizontal: `"top"` / `"center"` / `"bottom"` (vertical alignment of items). Vertical/Grid: `"left"` / `"center"` / `"right"` (horizontal position of the block). |
+| `maxWidth` | px | Grid only. Caps the grid width. Useful on wide screens. Omit for full-width. |
 
 ---
 
 ## Horizontal page
 
-Photos scroll left to right. Text column on the left.
-
-**Responsive:** touch portrait stacks vertically; touch landscape fills viewport height.
+Photos scroll left to right.
 
 ```js
 layout: "horizontal",
+contentAlign: "center",   // "top" | "center" | "bottom"
 photos: [
   { src: "images/photo.jpg", caption: "" },
   { src: "images/photo.jpg", h: 600, marginRight: 40 },
@@ -179,35 +161,34 @@ Per-photo overrides: `h`, `marginTop/Bottom/Left/Right`, `paddingTop/Bottom/Left
 
 ## Vertical page
 
-Photos stack top to bottom. Page scrolls normally.
-
-**Responsive:** touch portrait = full-width photos; touch landscape = full-screen width.
+Photos stack top to bottom. Page scrolls vertically.
 
 ```js
 layout: "vertical",
+contentAlign: "center",   // "left" | "center" | "right"
 photos: [
   { src: "images/photo.jpg" },
-  { src: "images/photo.jpg", w: 0.6 },         // 60% column width
-  { src: "images/photo.jpg", w: 0.8, h: 400 }, // 80% wide, cropped to 400px
+  { src: "images/photo.jpg", w: 0.6 },          // 60% of defaults.photoWidth
+  { src: "images/photo.jpg", w: 400, h: 300 },  // fixed 400px wide, 300px tall
 ]
 ```
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `w` | 0-1 or px | `photoWidth` | Width. `<= 1` = fraction of column; `> 1` = px |
-| `h` | px | auto | Height in px -- crops the image |
-| `marginTop/Bottom/Left/Right` | px | from `defaults` | Outer spacing |
+| `w` | 0–1 or px | `defaults.photoWidth` | `<= 1` = fraction of available width; `> 1` = explicit px |
+| `h` | px | auto | Fixed height in px |
+| `margin*` / `padding*` | px | from `defaults` | Spacing overrides |
 
 ---
 
 ## Grid page
 
-Photos placed in rows you define. Page scrolls vertically.
-
-**Responsive:** touch portrait = 2 per row; phone portrait = 1 per row.
+Photos placed in explicit rows. Page scrolls vertically.
 
 ```js
 layout: "grid",
+contentAlign: "center",
+maxWidth: 1400,
 rows: [
   [ photo, photo, photo ],
   [ photo, photo ],
@@ -216,20 +197,17 @@ rows: [
 
 | Properties set | Behaviour |
 |---|---|
-| `h` only | Fixed height, width auto -- no crop |
-| `w <= 1` only | Fills that fraction of the row, height auto |
+| neither | Equal share of remaining row width, height auto |
+| `w <= 1` only | Fraction of row width, height auto |
 | `w > 1` only | Fixed px width, height auto |
-| `w` + `h` | Fixed width, cropped to `h` |
-| neither | Equal share of remaining space, height auto |
-
-`w <= 1` is a fraction (`0.5` = 50%, `0.33` = 33%). `w > 1` is pixels (`300` = 300px fixed).
+| `h` only | Fixed height, width auto |
+| `w` + `h` | Fixed width and height |
 
 ---
 
 ## Inline text boxes
 
-Any item with a `content` array in `photos` or `rows` is rendered as an inline
-text box -- no border, no background, naked text in the photo flow.
+Any item with a `content` array inside `photos` or `rows` is an inline text box -- no border, no background, text flows in the photo sequence.
 
 ```js
 {
@@ -237,71 +215,40 @@ text box -- no border, no background, naked text in the photo flow.
     { text: "A title",   style: "pageTitle" },
     { text: "Body text", style: "bodyText"  },
   ],
-  align: "center",           // "top" | "center" | "bottom"
-  paddingLeft: 20,           // inner spacing overrides
-  w: 280,                    // width (meaning depends on layout)
+  align:        "top",   // "top" | "center" | "bottom"
+  paddingLeft:  20,
+  paddingRight: 20,
+  w:            0.33,    // width (same semantics as photos in each layout)
 }
 ```
 
-**Horizontal** -- `w` is explicit width in px:
-```js
-{ content: [...], align: "bottom", w: 300 }
-```
-
-**Vertical** -- `w` is fraction (0-1); `h` sets fixed height in px:
-```js
-{ content: [...], align: "top", w: 0.5, h: 400 }
-```
-
-**Grid** -- `w` (fraction) and `h` (px) to match adjacent photos:
-```js
-[
-  { content: [...], align: "center", w: 0.4, h: 780 },
-  { src: "images/photo.jpg",         w: 0.6, h: 780 },
-]
-```
+In horizontal layout, `w` is always px. In vertical and grid, `w` follows the same fraction/px rules as photos.
 
 ---
 
 ## Responsive behaviour
 
-The site adapts to three scenarios, detected at runtime by JavaScript and CSS.
+**Desktop** (pointer: mouse)
+All three layouts work as configured. Horizontal scrolls left-to-right, vertical and grid scroll top-to-bottom.
 
-**Desktop / laptop** (mouse, any screen width)
+**Touch devices** (phone, tablet -- `pointer: coarse` or `maxTouchPoints > 0`)
+All layouts collapse to a vertical single-column flow regardless of orientation:
+- Horizontal: photos stack vertically, full width, height auto.
+- Vertical: photos full width, `w` overridden.
+- Grid: 2 photos per row. Phones ≤ 600px: 1 photo per row.
 
-The text column sits fixed on the left. Photos have the full configured top margin (`layout.contentTopMargin`, default 150px). Each layout works as designed: horizontal scrolls left-to-right, vertical scrolls normally, grid respects the rows you defined.
-
-**Touch portrait** -- phone or tablet held upright
-
-Detected via `pointer: coarse` (CSS) and `navigator.maxTouchPoints > 0` (JS). Top margin reduces to 10px. The text column moves above the photos at full width. All three layouts collapse to a vertical single-column flow:
-- Horizontal: photos stack top-to-bottom, full width, height auto (the `h` value is ignored).
-- Vertical: identical to desktop but without the fixed left column.
-- Grid: 2 photos per row (flex-wrap). On phones with width ≤ 640px: 1 photo per row.
-
-Inline text boxes become full-width with auto height (min 80px).
-
-**Touch landscape** -- phone or tablet held sideways
-
-Detected via `pointer: coarse` + `orientation: landscape` (CSS), plus a JS class `touch-landscape` on `<html>` that catches iPads with Apple Pencil (which report `pointer: fine` despite being touch devices). Top margin is 10px.
-- Horizontal: text column stays left. Photo height is calculated by JS as `window.innerHeight - header - 10px` so they fill the visible viewport exactly with no vertical scroll and no overflow.
-- Vertical: text column moves above, photos fill full screen width (the `w` fraction is overridden).
-- Grid: text column moves above, rows stay side-by-side with `flex: 1 1 0` so each item takes an equal share of the width.
-
-**Navbar**
-
-Fixed at the top on all devices, always 42px tall. On phones ≤ 640px portrait the font shrinks to 12px and nav link gaps tighten to prevent overflow.
+Inline text boxes become full-width with auto height.
 
 ---
 
 ## Adding a new page
 
-1. Add an entry to `pages` in `config.js`
+1. Add an entry to `pages[]` in `config.js`
 2. Duplicate `page-2.html`, rename it (e.g. `page-4.html`)
-3. Update the page ID inside: `const PAGE_ID = 'page-4'`
+3. Inside the new file, update: `const PAGE_ID = 'page-4'`
 
 ---
 
 ## Deployment
 
-Upload the `portfolio/` folder to any static host.
-No server-side processing required -- pure HTML, CSS, JavaScript.
+Upload the folder to any static host. No server-side processing required.

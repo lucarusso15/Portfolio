@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Info</title>
+  <title>About</title>
   <link rel="icon" id="site-favicon" href="images/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -23,13 +23,13 @@
   <script src="js/portfolio.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const c    = PORTFOLIO_CONFIG;
-      const info = c.info;
-      document.title = info.name;
+      const c      = PORTFOLIO_CONFIG;
+      const about  = c.about;
+      document.title = about.name;
       buildHeader('about');
 
       /* Random quote -- rendered with _renderContentBlocks() so style and bold work */
-      const quotes = info.quotes && info.quotes.length ? info.quotes : [];
+      const quotes = about.quotes && about.quotes.length ? about.quotes : [];
       if (quotes.length) {
         const q       = quotes[Math.floor(Math.random() * quotes.length)];
         const quoteEl = document.getElementById('info-quote');
@@ -37,18 +37,18 @@
       }
 
       /* Bio -- rendered with _renderContentBlocks(), same as photo pages.
-         padding* and margin* on the info object apply to the wrapper div,
+         padding* and margin* on the about object apply to the wrapper div,
          same convention as inline text boxes in photo pages. */
       const defaults = getDefaults();
-      const padCSS   = _paddingStyle(info, defaults);
-      const margCSS  = _marginStyle(info, defaults);
-      const bioHTML  = _renderContentBlocks(info.content || []);
+      const padCSS   = _paddingStyle(about, defaults);
+      const margCSS  = _marginStyle(about, defaults);
+      const bioHTML  = _renderContentBlocks(about.content || []);
 
       /* Links */
-      const emailHTML = info.email
-        ? '<a href="mailto:' + info.email + '">' + info.email + '</a>'
+      const emailHTML = about.email
+        ? '<a href="mailto:' + about.email + '">' + about.email + '</a>'
         : '';
-      const linksHTML = (info.links || [])
+      const linksHTML = (about.links || [])
         .map(l => '<a href="' + l.link + '" target="_blank" rel="noopener">' + (l.displayLink || l.link) + '</a>')
         .join('');
 

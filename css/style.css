@@ -20,9 +20,6 @@
   /* Overridden by JS via applyLayoutSettings() */
   --pad:                50px;
   --content-top-margin: 0px;
-  --text-col-w:         200px;
-  --text-margin-right:  40px;
-  --text-margin-bottom: 0px;
   --photo-h:            780px;
   --photo-gap:          10px;
   --fs-navLinks:        15px;
@@ -87,21 +84,6 @@ nav a.active      { border-bottom: 1px solid var(--fg); }
 /* No bottom padding on horizontal pages -- min-height on .page-row
    already fills the viewport; extra padding would cause vertical overflow. */
 html.layout-horizontal .page-body { padding-bottom: 0; }
-
-/* ============================================================
-   TEXT COLUMN
-   Left column rendered by _buildTextColumn().
-   Used in horizontal (.text-col) and grid (.text-col-grid) pages.
-   Geometry overrides are injected inline by JS.
-   ============================================================ */
-
-.text-col,
-.text-col-grid,
-.about-text {
-  flex: 0 0 var(--text-col-w);
-  padding-right: var(--text-margin-right);
-  padding-bottom: var(--text-margin-bottom);
-}
 
 /* ============================================================
    HORIZONTAL PAGE
@@ -177,10 +159,9 @@ html.layout-horizontal .page-body { padding-bottom: 0; }
 }
 .photos-vertical .vertical-photo img {
   max-width: 100%;
-  max-height: calc(100svh - var(--header-h) - 20px);
-  max-height: calc(100vh  - var(--header-h) - 80px); /* fallback */
-  background: #e8e8e8;
+  height: auto;
   display: block;
+  background: #e8e8e8;
 }
 
 /* ============================================================
@@ -220,9 +201,11 @@ html.layout-horizontal .page-body { padding-bottom: 0; }
   align-items: flex-start;
 }
 .grid-row .grid-photo { min-width: 0; box-sizing: border-box; }
+/* Outer flex-sizing wrapper for grid text boxes.
+   Separates flex-basis from padding so padding doesn't expand the item. */
+.grid-row .grid-text-wrap { display: flex; }
 .grid-photo img {
-  max-height: calc(100svh - var(--header-h) - 20px);
-  max-height: calc(100vh  - var(--header-h) - 80px); /* fallback */
+  height: auto;
 }
 
 /* ============================================================
@@ -319,7 +302,6 @@ html.layout-horizontal .page-body { padding-bottom: 0; }
   /* Horizontal -> vertical stack */
   html.layout-horizontal body { overflow-x: hidden; }
   .page-row { flex-direction: column; overflow-x: visible; }
-  .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
   .photos-horizontal { flex-direction: column; width: 100%; overflow-x: visible; }
   .photos-horizontal .photo-wrap { flex: none; width: 100%; }
   .photos-horizontal .photo-wrap img {
@@ -334,7 +316,6 @@ html.layout-horizontal .page-body { padding-bottom: 0; }
   /* Vertical -> text above, photos full width */
   .page-vertical-wrap { flex-direction: column; justify-content: flex-start !important; }
   .vertical-inner { flex-direction: column; width: 100%; flex: none; }
-  .page-vertical-wrap .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
   .photos-vertical { flex: none; width: 100%; }
   .photos-vertical .vertical-photo { width: 100% !important; }
   .photos-vertical .vertical-photo img {
@@ -348,7 +329,6 @@ html.layout-horizontal .page-body { padding-bottom: 0; }
   /* Grid -> text above, 2 items per row */
   .page-grid-wrap { flex-direction: column; justify-content: flex-start !important; }
   .grid-inner { flex-direction: column; width: 100%; flex: none; }
-  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 16px; }
   .grid-row { flex-wrap: wrap; }
   .grid-photo { flex: 0 0 calc(50% - var(--photo-gap) / 2) !important; min-width: 0; }
   .grid-photo img { width: 100% !important; height: auto !important; max-height: none; }

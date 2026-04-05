@@ -38,10 +38,7 @@ function applyLayoutSettings() {
   const root     = document.documentElement.style;
 
   /* Map config keys to CSS custom properties */
-  if (layout.pageSidePadding  !== undefined) root.setProperty('--pad',               layout.pageSidePadding  + 'px');
-  if (layout.textColumnWidth  !== undefined) root.setProperty('--text-col-w',        layout.textColumnWidth  + 'px');
-  if (layout.textMarginRight  !== undefined) root.setProperty('--text-margin-right', layout.textMarginRight  + 'px');
-  if (layout.textMarginBottom !== undefined) root.setProperty('--text-margin-bottom',layout.textMarginBottom + 'px');
+  if (layout.pageSidePadding  !== undefined) root.setProperty('--pad', layout.pageSidePadding + 'px');
 
   root.setProperty('--photo-gap', defaults.photoGap + 'px');
 
@@ -99,7 +96,7 @@ function buildHeader(activePage) {
   const el     = document.querySelector('[data-header]');
   if (!el) return;
 
-  if (config.info.favicon) {
+  if (config.about.favicon) {
     let fav = document.getElementById('site-favicon');
     if (!fav) {
       fav     = document.createElement('link');
@@ -107,7 +104,7 @@ function buildHeader(activePage) {
       fav.id  = 'site-favicon';
       document.head.appendChild(fav);
     }
-    fav.href = config.info.favicon;
+    fav.href = config.about.favicon;
   }
 
   const pageLinks = config.pages.map((page, i) => {
@@ -116,38 +113,12 @@ function buildHeader(activePage) {
     return `<a href="${href}"${activeAttr}>${page.navLabel}</a>`;
   });
   pageLinks.push(
-    `<a href="about.html"${activePage === 'about' ? ' class="active"' : ''}>Info</a>`
+    `<a href="about.html"${activePage === 'about' ? ' class="active"' : ''}>About</a>`
   );
 
   el.innerHTML = `
-    <div class="site-name"><a href="index.html">${config.info.name}</a></div>
+    <div class="site-name"><a href="index.html">${config.about.name}</a></div>
     <nav>${pageLinks.join('')}</nav>`;
-}
-
-/* ============================================================
-   TEXT COLUMN
-   Renders the left column for vertical and grid pages.
-   Returns an HTML string, or "" if the column is hidden.
-
-   page.textColumn:
-     false | omitted | {} without content  -> hidden (returns "")
-     { content, width?, paddingRight?, paddingBottom? }  -> rendered
-   ============================================================ */
-
-function _buildTextColumn(page, colClass) {
-  const tc = page.textColumn;
-  if (!tc || tc === false) return '';
-
-  const opts = (typeof tc === 'object') ? tc : {};
-  if (!Array.isArray(opts.content) || opts.content.length === 0) return '';
-
-  const styles = [];
-  if (opts.width         !== undefined) styles.push(`flex-basis:${opts.width}px; width:${opts.width}px`);
-  if (opts.paddingRight  !== undefined) styles.push(`padding-right:${opts.paddingRight}px`);
-  if (opts.paddingBottom !== undefined) styles.push(`padding-bottom:${opts.paddingBottom}px`);
-  const styleAttr = styles.length ? ` style="${styles.join('; ')}"` : '';
-
-  return `<div class="${colClass}"${styleAttr}><div class="text-box-inner">${_renderContentBlocks(opts.content)}</div></div>`;
 }
 
 /* ============================================================
@@ -171,7 +142,7 @@ function buildTextBox(item, defaults, extraStyle) {
 
 /* ============================================================
    CONTENT BLOCK RENDERER
-   Shared by buildTextBox(), _buildTextColumn(), and about.html.
+   Shared by buildTextBox() and about.html.
    Each block: { text, style, bold? }
      style: any key from layout.fontSize in config.js
             e.g. pageTitle, bodyText, caption, navLinks, infoLinks, infoQuote
@@ -276,7 +247,6 @@ function buildHorizontalPage(page) {
   document.documentElement.classList.add('layout-horizontal');
 
   const defaults    = getDefaults();
-  const textColHTML = _buildTextColumn(page, 'text-col');
   const alignClass  = _alignClass(page.contentAlign, 'horizontal');
 
   const itemsHTML = page.photos.map(item => {
@@ -302,7 +272,6 @@ function buildHorizontalPage(page) {
   return `
     <div class="page-row-outer">
       <div class="page-row ${alignClass}">
-        ${textColHTML}
         <div class="photos-horizontal">${itemsHTML}</div>
       </div>
     </div>`;
@@ -317,7 +286,6 @@ function buildHorizontalPage(page) {
 
 function buildVerticalPage(page) {
   const defaults    = getDefaults();
-  const textColHTML = _buildTextColumn(page, 'text-col');
   const alignClass  = _alignClass(page.contentAlign, 'vertical');
 
   const itemsHTML = page.photos.map(item => {
@@ -330,15 +298,35 @@ function buildVerticalPage(page) {
       return buildTextBox(item, defaults, `${widthCSS}${heightCSS}${marginCSS ? marginCSS + ';' : ''}`);
     }
 
-    const paddingCSS = _paddingStyle(item, defaults);
-    const wrapStyle  = [marginCSS, paddingCSS].filter(Boolean).join('; ');
-    const heightRule = item.h !== undefined ? `height:${item.h}px; object-fit:cover;` : 'height:auto;';
-    const imgStyle   = `${widthCSS} ${heightRule} display:block; background:#e8e8e8;`;
+    const paddingCSS  = _paddingStyle(item, defaults);
+    const wrapStyle   = [marginCSS, paddingCSS].filter(Boolean).join('; ');
+    const heightRule  = item.h !== undefined ? `height:${item.h}px; object-fit:cover;` : 'height:auto;';
+    const imgStyle    = `${widthCSS} ${heightRule} display:block; background:#e8e8e8;`;
+
+    /* After load, if the rendered image bottom exceeds the viewport,
+       scale the wrapper down proportionally using natural dimensions. */
+    const onloadFn = `(function(img) {
+      var header = document.querySelector('header');
+      var headerH = header ? header.getBoundingClientRect().height : 0;
+      var ctm = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--content-top-margin')) || 0;
+      var gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--photo-gap')) || 0;
+      var avail = window.innerHeight - headerH - ctm - gap;
+      var rendered = img.getBoundingClientRect().height;
+      if (rendered > avail) {
+        var ratio = avail / rendered;
+        var w = Math.round(img.getBoundingClientRect().width * ratio);
+        var wrap = img.parentElement;
+        wrap.style.width = w + 'px';
+        var col = img.closest('.photos-vertical');
+        if (col) col.style.maxWidth = w + 'px';
+      }
+    })(this)`;
 
     return `
       <div class="photo-wrap vertical-photo"${wrapStyle ? ` style="${wrapStyle}"` : ''}>
         <img src="${item.src}" alt="${item.caption || ''}" loading="lazy"
              style="${imgStyle}"
+             onload="${onloadFn.replace(/"/g, '&quot;')}"
              onerror="this.style.background='#e0e0e0';this.removeAttribute('src')">
         ${item.caption ? `<div class="photo-caption">${item.caption}</div>` : ''}
       </div>`;
@@ -347,7 +335,6 @@ function buildVerticalPage(page) {
   return `
     <div class="page-vertical-wrap ${alignClass}">
       <div class="vertical-inner">
-        ${textColHTML}
         <div class="photos-vertical">${itemsHTML}</div>
       </div>
     </div>`;
@@ -362,14 +349,13 @@ function buildVerticalPage(page) {
 
 function buildGridPage(page) {
   const rowsHTML    = (page.rows || []).map(buildGridRow).join('');
-  const textColHTML = _buildTextColumn(page, 'text-col-grid');
   const alignClass  = _alignClass(page.contentAlign, 'grid');
+  const maxWidthCSS = page.maxWidth !== undefined ? ` style="max-width:${page.maxWidth}px"` : '';
 
   return `
     <div class="page-grid-wrap ${alignClass}">
       <div class="grid-inner">
-        ${textColHTML}
-        <div class="photos-grid">${rowsHTML}</div>
+        <div class="photos-grid"${maxWidthCSS}>${rowsHTML}</div>
       </div>
     </div>`;
 }
@@ -402,10 +388,19 @@ function buildGridRow(row) {
     }
 
     if (_isTextBox(item)) {
-      const heightCSS  = item.h !== undefined ? `height:${item.h}px;` : '';
-      const widthRule  = (rw && rw.mode === 'px') ? '' : 'width:100%;';
+      const heightCSS      = item.h !== undefined ? `height:${item.h}px;` : '';
       const containerStyle = [flexCSS, marginCSS].filter(Boolean).join('; ');
-      return buildTextBox(item, defaults, `${containerStyle};${heightCSS}${widthRule}`);
+      /* Wrap in an outer div that owns the flex sizing, then let .text-box
+         fill it with width:100% so padding is contained within flex-basis. */
+      const padCSS  = _paddingStyle(item, defaults);
+      const justify = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[item.align || 'top'] || 'flex-start';
+      const blocks  = Array.isArray(item.content) ? item.content : [];
+      return `
+        <div class="grid-text-wrap" style="${containerStyle}; min-width:0;">
+          <div class="text-box" style="width:100%; ${heightCSS} justify-content:${justify}; ${padCSS}">
+            <div class="text-box-inner">${_renderContentBlocks(blocks)}</div>
+          </div>
+        </div>`;
     }
 
     const heightRule = item.h !== undefined ? `height:${item.h}px; object-fit:cover;` : 'height:auto;';
