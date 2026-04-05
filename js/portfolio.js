@@ -24,12 +24,12 @@ function applyLayoutSettings() {
   r.setProperty('--photo-gap', d.photoGap + 'px');
 
   const fs = l.fontSize || {};
-  if (fs.navLinks    !== undefined) r.setProperty('--fs-nav',        fs.navLinks    + 'px');
-  if (fs.seriesTitle !== undefined) r.setProperty('--fs-title',      fs.seriesTitle + 'px');
-  if (fs.bodyText    !== undefined) r.setProperty('--fs-body',       fs.bodyText    + 'px');
-  if (fs.caption     !== undefined) r.setProperty('--fs-caption',    fs.caption     + 'px');
-  if (fs.infoLinks   !== undefined) r.setProperty('--fs-info-links', fs.infoLinks   + 'px');
-  if (fs.infoQuote   !== undefined) r.setProperty('--fs-info-quote', fs.infoQuote   + 'px');
+  if (fs.navLinks   !== undefined) r.setProperty('--fs-nav',        fs.navLinks   + 'px');
+  if (fs.pageTitle  !== undefined) r.setProperty('--fs-title',      fs.pageTitle  + 'px');
+  if (fs.bodyText   !== undefined) r.setProperty('--fs-body',       fs.bodyText   + 'px');
+  if (fs.caption    !== undefined) r.setProperty('--fs-caption',    fs.caption    + 'px');
+  if (fs.infoLinks  !== undefined) r.setProperty('--fs-info-links', fs.infoLinks  + 'px');
+  if (fs.infoQuote  !== undefined) r.setProperty('--fs-info-quote', fs.infoQuote  + 'px');
 
   /* Compute --photo-h and --content-top-margin via JS so we use
      window.innerHeight — the only reliable measure of actual visible
@@ -88,10 +88,10 @@ function buildHeader(activePage) {
     if (!fav) { fav = document.createElement('link'); fav.rel = 'icon'; fav.id = 'site-favicon'; document.head.appendChild(fav); }
     fav.href = c.photographer.favicon;
   }
-  const navLinks = c.series.map((s, i) => {
-    const href = i === 0 ? 'index.html' : s.id + '.html';
-    const cls  = activePage === s.id ? ' class="active"' : '';
-    return `<a href="${href}"${cls}>${s.title}</a>`;
+  const navLinks = c.pages.map((p, i) => {
+    const href = i === 0 ? 'index.html' : p.id + '.html';
+    const cls  = activePage === p.id ? ' class="active"' : '';
+    return `<a href="${href}"${cls}>${p.title}</a>`;
   });
   navLinks.push(`<a href="about.html"${activePage === 'about' ? ' class="active"' : ''}>Info</a>`);
   el.innerHTML = `
@@ -99,16 +99,16 @@ function buildHeader(activePage) {
     <nav>${navLinks.join('')}</nav>`;
 }
 
-/* ── SERIES DISPATCHER ───────────────────────────────────── */
+/* ── PAGE DISPATCHER ─────────────────────────────────────── */
 
-function buildSerie(serie) {
-  const paragraphs = serie.intro
+function buildPage(page) {
+  const paragraphs = page.intro
     .split('\n').map(l => l.trim()).filter(Boolean)
     .map(l => `<p>${l}</p>`).join('');
 
-  if (serie.layout === 'grid')     return buildGridSerie(serie, paragraphs);
-  if (serie.layout === 'vertical') return buildVerticalSerie(serie, paragraphs);
-  return buildHorizontalSerie(serie, paragraphs);
+  if (page.layout === 'grid')     return buildGridPage(page, paragraphs);
+  if (page.layout === 'vertical') return buildVerticalPage(page, paragraphs);
+  return buildHorizontalPage(page, paragraphs);
 }
 
 /* ── HORIZONTAL LAYOUT ───────────────────────────────────── */
@@ -119,10 +119,10 @@ function buildSerie(serie) {
  *   height exactly (JS computes the height from window.innerHeight).
  * Per-photo overrides: h, marginTop, marginBottom, marginLeft, marginRight.
  */
-function buildHorizontalSerie(serie, paragraphs) {
+function buildHorizontalPage(page, paragraphs) {
   const d = getDefaults();
 
-  const photosHTML = serie.photos.map(p => {
+  const photosHTML = page.photos.map(p => {
     const ml = p.marginLeft   !== undefined ? p.marginLeft   : d.marginLeft;
     const mr = p.marginRight  !== undefined ? p.marginRight  : d.marginRight;
     const mt = p.marginTop    !== undefined ? p.marginTop    : d.marginTop;
@@ -147,9 +147,9 @@ function buildHorizontalSerie(serie, paragraphs) {
   }).join('');
 
   return `
-    <div class="series-row">
+    <div class="page-row">
       <div class="text-col">
-        <h1>${serie.title}</h1>
+        <h1>${page.title}</h1>
         ${paragraphs}
       </div>
       <div class="photos-horizontal">${photosHTML}</div>
@@ -167,10 +167,10 @@ function buildHorizontalSerie(serie, paragraphs) {
  *   h  — height in px (crops the image). Omit for natural ratio.
  *   marginTop / marginBottom / marginLeft / marginRight — spacing overrides.
  */
-function buildVerticalSerie(serie, paragraphs) {
+function buildVerticalPage(page, paragraphs) {
   const d = getDefaults();
 
-  const photosHTML = serie.photos.map(p => {
+  const photosHTML = page.photos.map(p => {
     const ml = p.marginLeft   !== undefined ? p.marginLeft   : d.marginLeft;
     const mr = p.marginRight  !== undefined ? p.marginRight  : d.marginRight;
     const mt = p.marginTop    !== undefined ? p.marginTop    : d.marginTop;
@@ -199,9 +199,9 @@ function buildVerticalSerie(serie, paragraphs) {
   }).join('');
 
   return `
-    <div class="series-vertical-wrap">
+    <div class="page-vertical-wrap">
       <div class="text-col">
-        <h1>${serie.title}</h1>
+        <h1>${page.title}</h1>
         ${paragraphs}
       </div>
       <div class="photos-vertical">${photosHTML}</div>
@@ -221,14 +221,14 @@ function buildVerticalSerie(serie, paragraphs) {
  *   h + w    fills w fraction, height CROPPED to h
  *   neither  equal share, height from ratio (no crop)
  */
-function buildGridSerie(serie, paragraphs) {
-  const rows     = serie.rows || [];
+function buildGridPage(page, paragraphs) {
+  const rows     = page.rows || [];
   const rowsHTML = rows.map(row => buildGridRow(row)).join('');
 
   return `
-    <div class="series-grid-wrap">
+    <div class="page-grid-wrap">
       <div class="text-col-grid">
-        <h1>${serie.title}</h1>
+        <h1>${page.title}</h1>
         ${paragraphs}
       </div>
       <div class="photos-grid">${rowsHTML}</div>

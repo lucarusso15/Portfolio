@@ -72,8 +72,8 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .text-col-grid p:last-child,
 .about-text p:last-child { margin-bottom: 0; }
 
-/* ── HORIZONTAL SERIES ───────────────────────────────────── */
-.series-row {
+/* ── HORIZONTAL PAGE ────────────────────────────────────────── */
+.page-row {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -84,7 +84,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   padding-left: var(--pad);
   padding-right: var(--pad);
 }
-.series-row::-webkit-scrollbar { display: none; }
+.page-row::-webkit-scrollbar { display: none; }
 
 .photos-horizontal {
   display: flex;
@@ -109,8 +109,8 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   background: #e8e8e8;
 }
 
-/* ── VERTICAL SERIES ─────────────────────────────────────── */
-.series-vertical-wrap {
+/* ── VERTICAL PAGE ──────────────────────────────────────────── */
+.page-vertical-wrap {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -130,8 +130,8 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   display: block;
 }
 
-/* ── GRID SERIES ─────────────────────────────────────────── */
-.series-grid-wrap {
+/* ── GRID PAGE ──────────────────────────────────────────────── */
+.page-grid-wrap {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -211,6 +211,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
      padding-bottom on .page-body pushes total height beyond viewport. */
   .page-body { padding-bottom: 0; }
 
+
   /* Horizontal photo height is handled in base CSS (min + dvh).
      --content-top-margin: 10px above gives photos more room on coarse-pointer devices. */
 
@@ -222,7 +223,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   }
 
   /* Grid: text above; each row keeps its photos side-by-side, scaled to fit width */
-  .series-grid-wrap { flex-direction: column; }
+  .page-grid-wrap { flex-direction: column; }
   .text-col-grid {
     flex: none; width: 100%;
     padding-right: 0; padding-bottom: 20px;
@@ -240,7 +241,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   :root { --pad: 22px; }  /* margin set by JS */
 
   /* Horizontal → vertical stack */
-  .series-row { flex-direction: column; overflow-x: visible; }
+  .page-row { flex-direction: column; overflow-x: visible; }
   .text-col {
     flex: none; width: 100%;
     padding-right: 0; padding-bottom: 20px;
@@ -254,8 +255,8 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   }
 
   /* Vertical → text above, all photos full width */
-  .series-vertical-wrap { flex-direction: column; }
-  .series-vertical-wrap .text-col {
+  .page-vertical-wrap { flex-direction: column; }
+  .page-vertical-wrap .text-col {
     flex: none; width: 100%;
     padding-right: 0; padding-bottom: 20px;
   }
@@ -266,7 +267,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   }
 
   /* Grid → text above, 2 photos per row, natural ratio */
-  .series-grid-wrap { flex-direction: column; }
+  .page-grid-wrap { flex-direction: column; }
   .text-col-grid {
     flex: none; width: 100%;
     padding-right: 0; padding-bottom: 20px;
@@ -300,3 +301,4 @@ nav a.active { border-bottom: 1px solid var(--fg); }
    including fine-pointer like iPad + Apple Pencil that bypass
    the pointer:coarse media query above) ─────────────────── */
 html.touch-landscape .page-body { padding-bottom: 0; }
+

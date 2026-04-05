@@ -9,9 +9,9 @@ Works on any static host (Netlify, Vercel, Cloudflare Pages, shared hosting, etc
 
 ```
 portfolio/
-├── index.html       ← Home = Series 1
-├── series-2.html    ← Series 2
-├── series-3.html    ← Series 3  (duplicate for more)
+├── index.html       ← Home = Page 1
+├── page-2.html      ← Page 2
+├── page-3.html      ← Page 3  (duplicate for more)
 ├── about.html       ← Info / Bio page
 ├── config.js        ← EDIT THIS — all configuration lives here
 ├── css/style.css
@@ -34,7 +34,7 @@ PORTFOLIO_CONFIG
 ├── layout        — page structure, text column, font sizes
 ├── defaults      — photo height/width, gap, margins (global, overridable per-photo)
 ├── quotes        — random phrases shown on the Info page
-└── series        — your photo series, each with layout + photos/rows
+└── pages         — your photo pages, each with layout + photos/rows
 ```
 
 ---
@@ -81,12 +81,12 @@ layout: {
   textMarginBottom: 0,     // extra space below the text block (px)
 
   fontSize: {
-    navLinks:    15,   // navigation links (px)
-    seriesTitle: 20,   // series title heading (px)
-    bodyText:    14,   // intro / bio text (px)
-    caption:     12,   // photo captions (px)
-    infoLinks:   14,   // links on the Info page (px)
-    infoQuote:   22,   // random phrase on the Info page (px)
+    navLinks:   15,   // navigation links (px)
+    pageTitle:  20,   // page title heading (px)
+    bodyText:   14,   // intro / bio text (px)
+    caption:    12,   // photo captions (px)
+    infoLinks:  14,   // links on the Info page (px)
+    infoQuote:  22,   // random phrase on the Info page (px)
   },
 },
 ```
@@ -126,7 +126,7 @@ quotes: [
 
 ---
 
-## Horizontal series
+## Horizontal page
 
 Photos scroll left → right. Text is fixed on the left.
 
@@ -146,7 +146,7 @@ Per-photo overrides: `h`, `marginTop`, `marginBottom`, `marginLeft`, `marginRigh
 
 ---
 
-## Vertical series
+## Vertical page
 
 Photos stack top → bottom. Page scrolls normally.
 
@@ -171,7 +171,7 @@ photos: [
 
 ---
 
-## Grid series
+## Grid page
 
 Photos placed in rows you define. Page scrolls vertically.
 
@@ -199,12 +199,12 @@ rows: [
 
 ---
 
-## Adding a new series
+## Adding a new page
 
-1. Add an entry to `series` in `config.js`
-2. Duplicate `series-2.html`, rename (e.g. `series-4.html`)
-3. Inside the new file, update the series index:
-   `PORTFOLIO_CONFIG.series[1]` → `PORTFOLIO_CONFIG.series[3]`
+1. Add an entry to `pages` in `config.js`
+2. Duplicate `page-2.html`, rename (e.g. `page-4.html`)
+3. Inside the new file, update the page ID:
+   `const PAGE_ID = 'page-2'` → `const PAGE_ID = 'page-4'`
 
 ---
 

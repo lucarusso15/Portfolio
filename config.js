@@ -38,12 +38,12 @@ You can use multiple paragraphs separated by a blank line.`,
     textMarginBottom: 0,     // extra space below the text block (px)
 
     fontSize: {
-      navLinks:    15,
-      seriesTitle: 20,
-      bodyText:    14,
-      caption:     12,
-      infoLinks:   14,
-      infoQuote:   14,   // font size of the random phrase on the Info page (px)
+      navLinks:   15,
+      pageTitle:  20,
+      bodyText:   14,
+      caption:    12,
+      infoLinks:  14,
+      infoQuote:  14,   // font size of the random phrase on the Info page (px)
     },
   },
 
@@ -69,9 +69,9 @@ You can use multiple paragraphs separated by a blank line.`,
     "A photograph is a secret about a secret.",
   ],
 
-  // ── PHOTO SERIES ─────────────────────────────────────────────
-  // The FIRST series is the home page (index.html).
-  // Each additional series needs its own HTML file (series-2.html, etc.).
+  // ── PHOTO PAGES ──────────────────────────────────────────────
+  // The FIRST page is the home page (index.html).
+  // Each additional page needs its own HTML file (page-2.html, etc.).
   //
   // layout: "horizontal"
   //   Desktop: text left, photos scroll left → right.
@@ -94,12 +94,12 @@ You can use multiple paragraphs separated by a blank line.`,
   //     h  — height in px. With w: cropped. Without w: auto width from ratio.
   //     marginTop, marginBottom, marginLeft, marginRight.
   //
-  series: [
+  pages: [
     {
-      id:     "series-1",
-      title:  "Series 1",
+      id:     "page-1",
+      title:  "Page 1",
       layout: "horizontal",
-      intro: `Introductory text for the first series. Describe the project: where, when and why.
+      intro: `Introductory text for the first page. Describe the project: where, when and why.
 
 You can write multiple paragraphs. The text stays on the left, photos scroll to the right.`,
       photos: [
@@ -110,10 +110,10 @@ You can write multiple paragraphs. The text stays on the left, photos scroll to 
       ],
     },
     {
-      id:     "series-2",
-      title:  "Series 2",
+      id:     "page-2",
+      title:  "Page 2",
       layout: "vertical",
-      intro: `Introductory text for the second series. The photos are stacked vertically and the page scrolls normally.`,
+      intro: `Introductory text for the second page. The photos are stacked vertically and the page scrolls normally.`,
       photos: [
         { src: "images/image_001.JPG",  caption: "" },
         { src: "images/image_002.JPG", caption: "" },
@@ -122,10 +122,10 @@ You can write multiple paragraphs. The text stays on the left, photos scroll to 
       ],
     },
     {
-      id:     "series-3",
-      title:  "Series 3",
+      id:     "page-3",
+      title:  "Page 3",
       layout: "grid",
-      intro: `Introductory text for the third series.`, 
+      intro: `Introductory text for the third page.`, 
       rows: [
         [
           { src: "images/image_001.JPG",  caption: "", h: 780 },
