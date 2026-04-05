@@ -1,11 +1,15 @@
 /* portfolio.js — shared rendering functions */
 
-/* ── HELPERS ─────────────────────────────────────────────── */
+/* -- HELPERS ------------------------------------------------ */
 
 /* Returns the merged defaults object (config defaults + built-in fallbacks). */
 function getDefaults() {
   return Object.assign(
-    { photoHeight: 780, photoWidth: 800, photoGap: 18, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0 },
+    {
+      photoHeight:  780, photoWidth: 800, photoGap: 18,
+      marginTop:    0, marginBottom:  0, marginLeft:  0, marginRight:  0,
+      paddingTop:   0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0,
+    },
     PORTFOLIO_CONFIG.defaults || {}
   );
 }
@@ -32,7 +36,7 @@ function applyLayoutSettings() {
   if (fs.infoQuote  !== undefined) r.setProperty('--fs-info-quote', fs.infoQuote  + 'px');
 
   /* Compute --photo-h and --content-top-margin via JS so we use
-     window.innerHeight — the only reliable measure of actual visible
+     window.innerHeight -- the only reliable measure of actual visible
      area on iOS Safari (100vh/100dvh both ignore the browser toolbar). */
   _applyViewportProps();
   window.addEventListener('resize', _applyViewportProps);
@@ -52,37 +56,30 @@ function _applyViewportProps() {
   const MARGIN_TOUCH = 10;
 
   if (isTouch && isLandsc) {
-    /* Touch landscape: constrain photo height to what actually fits on screen.
-       Safety margin of 10px prevents sub-pixel rounding from causing overflow. */
     const avail = window.innerHeight - HEADER_H - MARGIN_TOUCH - 10;
     r.setProperty('--photo-h',            Math.min(d.photoHeight, Math.max(avail, 50)) + 'px');
     r.setProperty('--content-top-margin', MARGIN_TOUCH + 'px');
-    /* Class used by CSS to also remove padding-bottom for fine-pointer touch devices
-       (e.g. iPad with Apple Pencil) that don't match pointer:coarse. */
     document.documentElement.classList.add('touch-landscape');
     document.documentElement.classList.remove('touch-portrait');
   } else if (isTouch) {
-    /* Touch portrait: photos stack (CSS handles it), restore desktop photo-h. */
     r.setProperty('--photo-h',            d.photoHeight + 'px');
     r.setProperty('--content-top-margin', MARGIN_TOUCH + 'px');
     document.documentElement.classList.add('touch-portrait');
     document.documentElement.classList.remove('touch-landscape');
   } else {
-    /* Desktop/laptop: use configured values. */
     r.setProperty('--photo-h',            d.photoHeight + 'px');
     r.setProperty('--content-top-margin', (l.contentTopMargin ?? 150) + 'px');
     document.documentElement.classList.remove('touch-landscape', 'touch-portrait');
   }
 }
 
-/* ── HEADER ──────────────────────────────────────────────── */
+/* -- HEADER ------------------------------------------------- */
 
 function buildHeader(activePage) {
   const c  = PORTFOLIO_CONFIG;
   const el = document.querySelector('[data-header]');
   if (!el) return;
 
-  /* Favicon — update from config if set */
   if (c.photographer.favicon) {
     let fav = document.getElementById('site-favicon');
     if (!fav) { fav = document.createElement('link'); fav.rel = 'icon'; fav.id = 'site-favicon'; document.head.appendChild(fav); }
@@ -91,7 +88,7 @@ function buildHeader(activePage) {
   const navLinks = c.pages.map((p, i) => {
     const href = i === 0 ? 'index.html' : p.id + '.html';
     const cls  = activePage === p.id ? ' class="active"' : '';
-    return `<a href="${href}"${cls}>${p.title}</a>`;
+    return `<a href="${href}"${cls}>${p.navLabel}</a>`;
   });
   navLinks.push(`<a href="about.html"${activePage === 'about' ? ' class="active"' : ''}>Info</a>`);
   el.innerHTML = `
@@ -99,138 +96,239 @@ function buildHeader(activePage) {
     <nav>${navLinks.join('')}</nav>`;
 }
 
-/* ── PAGE DISPATCHER ─────────────────────────────────────── */
+/* -- TEXT COLUMN --------------------------------------------
+ * Builds the left column for a page. Returns HTML or "".
+ *
+ * page.textColumn:
+ *   false
+ *     Column not rendered. Photos fill full width.
+ *
+ *   { content: [...], width?, paddingRight?, paddingBottom? }
+ *     Renders using the content block array (same format as
+ *     inline text boxes). Geometry overrides are optional.
+ *
+ *   (omitted) | true | {} without content
+ *     No content to show -- returns "" (column hidden).
+ *
+ * colClass: "text-col" (horizontal/vertical) or "text-col-grid" (grid).
+ */
+function _buildTextColumn(page, colClass) {
+  const tc = page.textColumn;
 
-function buildPage(page) {
-  const paragraphs = page.intro
-    .split('\n').map(l => l.trim()).filter(Boolean)
-    .map(l => `<p>${l}</p>`).join('');
+  /* textColumn: false -- omit entirely */
+  if (tc === false) return '';
 
-  if (page.layout === 'grid')     return buildGridPage(page, paragraphs);
-  if (page.layout === 'vertical') return buildVerticalPage(page, paragraphs);
-  return buildHorizontalPage(page, paragraphs);
+  const opts = (tc !== null && typeof tc === 'object') ? tc : {};
+
+  /* No content array -- nothing to render */
+  if (!Array.isArray(opts.content)) return '';
+
+  /* Inline style overrides for geometry */
+  const styleRules = [];
+  if (opts.width         !== undefined) styleRules.push(`flex-basis:${opts.width}px; width:${opts.width}px`);
+  if (opts.paddingRight  !== undefined) styleRules.push(`padding-right:${opts.paddingRight}px`);
+  if (opts.paddingBottom !== undefined) styleRules.push(`padding-bottom:${opts.paddingBottom}px`);
+  const inlineStyle = styleRules.length ? ` style="${styleRules.join('; ')}"` : '';
+
+  const innerHTML = _renderContentBlocks(opts.content);
+  return `<div class="${colClass}"${inlineStyle}><div class="text-box-inner">${innerHTML}</div></div>`;
 }
 
-/* ── HORIZONTAL LAYOUT ───────────────────────────────────── */
-/*
- * Desktop / laptop: text fixed left, photos scroll left → right.
- * Touch portrait (phone or tablet upright): collapses to vertical stack via CSS.
- * Touch landscape (phone or tablet sideways): photos fill the visible viewport
- *   height exactly (JS computes the height from window.innerHeight).
- * Per-photo overrides: h, marginTop, marginBottom, marginLeft, marginRight.
+/* -- TEXT BOX -----------------------------------------------
+ * Renders an inline text box that sits in the photo sequence.
+ * No border, no background -- naked text on the page colour.
+ *
+ * item.content  array of block objects (see _renderContentBlocks)
+ * item.align    "top" | "center" | "bottom". Default: "top"
+ * item.padding* inner spacing in px (per-item or from defaults)
+ *
+ * Size properties (w, h, margins) are resolved by each layout
+ * builder and passed in via extraStyle.
+ *
+ * Backward compat: { text: "...", fontSize: N } still works.
  */
-function buildHorizontalPage(page, paragraphs) {
+function buildTextBox(item, extraStyle) {
   const d = getDefaults();
 
-  const photosHTML = page.photos.map(p => {
-    const ml = p.marginLeft   !== undefined ? p.marginLeft   : d.marginLeft;
-    const mr = p.marginRight  !== undefined ? p.marginRight  : d.marginRight;
-    const mt = p.marginTop    !== undefined ? p.marginTop    : d.marginTop;
-    const mb = p.marginBottom !== undefined ? p.marginBottom : d.marginBottom;
+  const justifyMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' };
+  const justify    = justifyMap[item.align || 'top'] || 'flex-start';
+  const paddingStyle = _paddingStyle(item, d);
 
-    const style = [
-      ml ? `margin-left:${ml}px`   : '',
-      mr ? `margin-right:${mr}px`  : '',
-      mt ? `margin-top:${mt}px`    : '',
-      mb ? `margin-bottom:${mb}px` : '',
-    ].filter(Boolean).join('; ');
+  let blocks;
+  if (Array.isArray(item.content)) {
+    blocks = item.content;
+  } else {
+    /* Legacy flat string */
+    const legacyFontSize = item.fontSize !== undefined ? `font-size:${item.fontSize}px;` : '';
+    blocks = [{ text: item.text || '', _legacyStyle: legacyFontSize }];
+  }
 
-    const imgStyle = p.h !== undefined ? `height:${p.h}px;` : '';
+  const innerHTML = _renderContentBlocks(blocks);
 
+  return `
+    <div class="text-box" style="justify-content:${justify};${paddingStyle}${extraStyle || ''}">
+      <div class="text-box-inner">${innerHTML}</div>
+    </div>`;
+}
+
+/* -- CONTENT BLOCK RENDERER ---------------------------------
+ * Shared by buildTextBox() and _buildTextColumn().
+ * Converts an array of block objects into HTML strings.
+ *
+ * Each block:
+ *   text          string  (required) -- use \n for line breaks
+ *   style         "pageTitle" | "bodyText" | "caption" | "navLinks"
+ *                 Maps to CSS font-size variables. Default: "bodyText".
+ *                 "pageTitle" is always bold.
+ *   bold          true | false -- force bold for any other style
+ */
+const TEXT_STYLE_MAP = {
+  pageTitle: 'var(--fs-title)',
+  bodyText:  'var(--fs-body)',
+  caption:   'var(--fs-caption)',
+  navLinks:  'var(--fs-nav)',
+};
+
+function _renderContentBlocks(blocks) {
+  return blocks.map(block => {
+    const fsVar       = TEXT_STYLE_MAP[block.style] || TEXT_STYLE_MAP['bodyText'];
+    const fontSizeCSS = block._legacyStyle || `font-size:${fsVar};`;
+    const isBold      = block.style === 'pageTitle' || block.bold === true;
+    const weightCSS   = isBold ? 'font-weight:700;' : 'font-weight:400;';
+
+    const linesHTML = (block.text || '').split('\n')
+      .map(line => `<span>${line}</span>`)
+      .join('<br>');
+
+    return `<div class="text-box-block" style="${fontSizeCSS}${weightCSS}">${linesHTML}</div>`;
+  }).join('');
+}
+
+/* -- SPACING HELPERS ---------------------------------------- */
+
+function _marginStyle(item, d) {
+  const ml = item.marginLeft   !== undefined ? item.marginLeft   : d.marginLeft;
+  const mr = item.marginRight  !== undefined ? item.marginRight  : d.marginRight;
+  const mt = item.marginTop    !== undefined ? item.marginTop    : d.marginTop;
+  const mb = item.marginBottom !== undefined ? item.marginBottom : d.marginBottom;
+  return [
+    ml ? `margin-left:${ml}px`   : '',
+    mr ? `margin-right:${mr}px`  : '',
+    mt ? `margin-top:${mt}px`    : '',
+    mb ? `margin-bottom:${mb}px` : '',
+  ].filter(Boolean).join('; ');
+}
+
+function _paddingStyle(item, d) {
+  const pt = item.paddingTop    !== undefined ? item.paddingTop    : d.paddingTop;
+  const pb = item.paddingBottom !== undefined ? item.paddingBottom : d.paddingBottom;
+  const pl = item.paddingLeft   !== undefined ? item.paddingLeft   : d.paddingLeft;
+  const pr = item.paddingRight  !== undefined ? item.paddingRight  : d.paddingRight;
+  if (!pt && !pb && !pl && !pr) return '';
+  return `padding:${pt}px ${pr}px ${pb}px ${pl}px;`;
+}
+
+/* -- PAGE DISPATCHER ---------------------------------------- */
+
+function buildPage(page) {
+  if (page.layout === 'grid')     return buildGridPage(page);
+  if (page.layout === 'vertical') return buildVerticalPage(page);
+  return buildHorizontalPage(page);
+}
+
+/* -- HORIZONTAL LAYOUT --------------------------------------
+ * Desktop: text column fixed left, photos scroll left to right.
+ * Touch portrait: collapses to vertical stack via CSS.
+ * Touch landscape: photos fill the visible viewport height.
+ */
+function buildHorizontalPage(page) {
+  const d = getDefaults();
+  const textColHTML = _buildTextColumn(page, 'text-col');
+
+  const itemsHTML = page.photos.map(item => {
+    const marginStyle = _marginStyle(item, d);
+
+    if (item.content !== undefined || (item.text !== undefined && !item.src)) {
+      const widthStyle = item.w !== undefined ? `width:${item.w}px;` : '';
+      return buildTextBox(item, `${widthStyle}${marginStyle ? marginStyle + ';' : ''}`);
+    }
+
+    const paddingStyle = _paddingStyle(item, d);
+    const wrapStyle    = [marginStyle, paddingStyle].filter(Boolean).join('; ');
+    const imgStyle     = item.h !== undefined ? `height:${item.h}px;` : '';
     return `
-      <div class="photo-wrap"${style ? ` style="${style}"` : ''}>
-        <img src="${p.src}" alt="${p.caption || ''}" loading="lazy"
+      <div class="photo-wrap"${wrapStyle ? ` style="${wrapStyle}"` : ''}>
+        <img src="${item.src}" alt="${item.caption || ''}" loading="lazy"
              ${imgStyle ? `style="${imgStyle}"` : ''}
              onerror="this.style.background='#e0e0e0';this.removeAttribute('src')">
-        ${p.caption ? `<div class="photo-caption">${p.caption}</div>` : ''}
+        ${item.caption ? `<div class="photo-caption">${item.caption}</div>` : ''}
       </div>`;
   }).join('');
 
   return `
     <div class="page-row">
-      <div class="text-col">
-        <h1>${page.title}</h1>
-        ${paragraphs}
-      </div>
-      <div class="photos-horizontal">${photosHTML}</div>
+      ${textColHTML}
+      <div class="photos-horizontal">${itemsHTML}</div>
     </div>`;
 }
 
-/* ── VERTICAL LAYOUT ─────────────────────────────────────── */
-/*
- * Desktop / laptop: text fixed left, photos stack top → bottom, page scrolls normally.
- * Touch portrait: text moves above photos, all photos fill full width.
- * Touch landscape: photos fill screen width (override inline w-fraction).
- *
- * Per-photo properties:
- *   w  — width as a fraction of the photos column (0 to 1). Default: 1 (full width).
- *   h  — height in px (crops the image). Omit for natural ratio.
- *   marginTop / marginBottom / marginLeft / marginRight — spacing overrides.
+/* -- VERTICAL LAYOUT ----------------------------------------
+ * Desktop: text column fixed left, photos stack top to bottom.
+ * Touch portrait: text above, all items fill full width.
+ * Touch landscape: items fill screen width.
  */
-function buildVerticalPage(page, paragraphs) {
+function buildVerticalPage(page) {
   const d = getDefaults();
+  const textColHTML = _buildTextColumn(page, 'text-col');
 
-  const photosHTML = page.photos.map(p => {
-    const ml = p.marginLeft   !== undefined ? p.marginLeft   : d.marginLeft;
-    const mr = p.marginRight  !== undefined ? p.marginRight  : d.marginRight;
-    const mt = p.marginTop    !== undefined ? p.marginTop    : d.marginTop;
-    const mb = p.marginBottom !== undefined ? p.marginBottom : d.marginBottom;
+  const itemsHTML = page.photos.map(item => {
+    const marginStyle = _marginStyle(item, d);
 
-    const outerStyle = [
-      ml ? `margin-left:${ml}px`   : '',
-      mr ? `margin-right:${mr}px`  : '',
-      mt ? `margin-top:${mt}px`    : '',
-      mb ? `margin-bottom:${mb}px` : '',
-    ].filter(Boolean).join('; ');
+    if (item.content !== undefined || (item.text !== undefined && !item.src)) {
+      const wStyle = item.w !== undefined
+        ? `width:${(item.w * 100).toFixed(2)}%;`
+        : `width:${d.photoWidth}px; max-width:100%;`;
+      const hStyle = item.h !== undefined ? `height:${item.h}px;` : '';
+      return buildTextBox(item, `${wStyle}${hStyle}${marginStyle ? marginStyle + ';' : ''}`);
+    }
 
-    const wStyle = p.w !== undefined
-      ? `width:${(p.w * 100).toFixed(2)}%`
+    const paddingStyle = _paddingStyle(item, d);
+    const wrapStyle    = [marginStyle, paddingStyle].filter(Boolean).join('; ');
+    const wStyle   = item.w !== undefined
+      ? `width:${(item.w * 100).toFixed(2)}%`
       : `width:${d.photoWidth}px; max-width:100%`;
-    const hRule = p.h !== undefined ? `height:${p.h}px; object-fit:cover;` : 'height:auto;';
+    const hRule    = item.h !== undefined ? `height:${item.h}px; object-fit:cover;` : 'height:auto;';
     const imgStyle = `${wStyle}; ${hRule} display:block; background:#e8e8e8;`;
 
     return `
-      <div class="photo-wrap vertical-photo"${outerStyle ? ` style="${outerStyle}"` : ''}>
-        <img src="${p.src}" alt="${p.caption || ''}" loading="lazy"
+      <div class="photo-wrap vertical-photo"${wrapStyle ? ` style="${wrapStyle}"` : ''}>
+        <img src="${item.src}" alt="${item.caption || ''}" loading="lazy"
              style="${imgStyle}"
              onerror="this.style.background='#e0e0e0';this.removeAttribute('src')">
-        ${p.caption ? `<div class="photo-caption">${p.caption}</div>` : ''}
+        ${item.caption ? `<div class="photo-caption">${item.caption}</div>` : ''}
       </div>`;
   }).join('');
 
   return `
     <div class="page-vertical-wrap">
-      <div class="text-col">
-        <h1>${page.title}</h1>
-        ${paragraphs}
-      </div>
-      <div class="photos-vertical">${photosHTML}</div>
+      ${textColHTML}
+      <div class="photos-vertical">${itemsHTML}</div>
     </div>`;
 }
 
-/* ── GRID LAYOUT ─────────────────────────────────────────── */
-/*
- * Desktop / laptop: text fixed left, photos placed in explicit rows.
- * Touch landscape: text above, each row keeps photos side-by-side and fills screen width.
- * Touch portrait: text above, 2 photos per row.
- * Phone portrait (≤ 640px): 1 photo per row.
- *
- * Four photo modes (by h and w):
- *   h only   fixed height, width auto from ratio (no crop)
- *   w only   fills w fraction of row, height from ratio (no crop)
- *   h + w    fills w fraction, height CROPPED to h
- *   neither  equal share, height from ratio (no crop)
+/* -- GRID LAYOUT --------------------------------------------
+ * Desktop: text column fixed left, photos in explicit rows.
+ * Touch landscape: text above, rows side-by-side, fills width.
+ * Touch portrait: text above, 2 items per row.
+ * Phone portrait (<= 640px): 1 item per row.
  */
-function buildGridPage(page, paragraphs) {
-  const rows     = page.rows || [];
-  const rowsHTML = rows.map(row => buildGridRow(row)).join('');
+function buildGridPage(page) {
+  const rowsHTML    = (page.rows || []).map(row => buildGridRow(row)).join('');
+  const textColHTML = _buildTextColumn(page, 'text-col-grid');
 
   return `
     <div class="page-grid-wrap">
-      <div class="text-col-grid">
-        <h1>${page.title}</h1>
-        ${paragraphs}
-      </div>
+      ${textColHTML}
       <div class="photos-grid">${rowsHTML}</div>
     </div>`;
 }
@@ -239,58 +337,57 @@ function buildGridRow(row) {
   const d     = getDefaults();
   const SCALE = 100;
 
-  const wPhotos    = row.filter(p => p.w !== undefined);
-  const autoPhotos = row.filter(p => p.w === undefined && p.h === undefined);
-  const explicitW  = wPhotos.reduce((s, p) => s + p.w, 0);
-  const remaining  = Math.max(0, 1 - explicitW);
-  const autoShare  = autoPhotos.length > 0 ? remaining / autoPhotos.length : 0;
+  const wItems    = row.filter(p => p.w !== undefined);
+  const autoItems = row.filter(p => p.w === undefined && p.h === undefined);
+  const explicitW = wItems.reduce((s, p) => s + p.w, 0);
+  const remaining = Math.max(0, 1 - explicitW);
+  const autoShare = autoItems.length > 0 ? remaining / autoItems.length : 0;
 
-  const photosHTML = row.map(p => {
-    const ml = p.marginLeft   !== undefined ? p.marginLeft   : d.marginLeft;
-    const mr = p.marginRight  !== undefined ? p.marginRight  : d.marginRight;
-    const mt = p.marginTop    !== undefined ? p.marginTop    : d.marginTop;
-    const mb = p.marginBottom !== undefined ? p.marginBottom : d.marginBottom;
+  const itemsHTML = row.map(item => {
+    const marginStyle = _marginStyle(item, d);
+
+    if (item.content !== undefined || (item.text !== undefined && !item.src)) {
+      const g          = (item.w !== undefined ? item.w : autoShare) * SCALE;
+      const flexStyle  = `flex: ${g.toFixed(2)} ${g.toFixed(2)} 0; min-width:0`;
+      const hStyle     = item.h !== undefined ? `height:${item.h}px;` : '';
+      const extraStyle = [flexStyle, marginStyle].filter(Boolean).join('; ');
+      return buildTextBox(item, `${extraStyle};${hStyle}width:100%;`);
+    }
 
     let outerFlex, imgStyle;
-
-    if (p.h !== undefined && p.w === undefined) {
+    if (item.h !== undefined && item.w === undefined) {
       outerFlex = 'flex: 0 0 auto';
-      imgStyle  = `height:${p.h}px; width:auto; display:block; background:#e8e8e8;`;
-    } else if (p.w !== undefined && p.h === undefined) {
-      const g   = (p.w * SCALE).toFixed(2);
+      imgStyle  = `height:${item.h}px; width:auto; display:block; background:#e8e8e8;`;
+    } else if (item.w !== undefined && item.h === undefined) {
+      const g   = (item.w * SCALE).toFixed(2);
       outerFlex = `flex: ${g} ${g} 0; min-width:0`;
       imgStyle  = 'width:100%; height:auto; display:block; background:#e8e8e8;';
-    } else if (p.w !== undefined && p.h !== undefined) {
-      const g   = (p.w * SCALE).toFixed(2);
+    } else if (item.w !== undefined && item.h !== undefined) {
+      const g   = (item.w * SCALE).toFixed(2);
       outerFlex = `flex: ${g} ${g} 0; min-width:0`;
-      imgStyle  = `height:${p.h}px; width:100%; object-fit:cover; display:block; background:#e8e8e8;`;
+      imgStyle  = `height:${item.h}px; width:100%; object-fit:cover; display:block; background:#e8e8e8;`;
     } else {
       const g   = (autoShare * SCALE).toFixed(2);
       outerFlex = `flex: ${g} ${g} 0; min-width:0`;
       imgStyle  = 'width:100%; height:auto; display:block; background:#e8e8e8;';
     }
 
-    const outerStyle = [
-      outerFlex,
-      ml ? `margin-left:${ml}px`   : '',
-      mr ? `margin-right:${mr}px`  : '',
-      mt ? `margin-top:${mt}px`    : '',
-      mb ? `margin-bottom:${mb}px` : '',
-    ].filter(Boolean).join('; ');
+    const paddingStyle = _paddingStyle(item, d);
+    const outerStyle   = [outerFlex, marginStyle, paddingStyle].filter(Boolean).join('; ');
 
     return `
       <div class="photo-wrap grid-photo" style="${outerStyle}">
-        <img src="${p.src}" alt="${p.caption || ''}" loading="lazy"
+        <img src="${item.src}" alt="${item.caption || ''}" loading="lazy"
              style="${imgStyle}"
              onerror="this.style.background='#e0e0e0';this.removeAttribute('src')">
-        ${p.caption ? `<div class="photo-caption">${p.caption}</div>` : ''}
+        ${item.caption ? `<div class="photo-caption">${item.caption}</div>` : ''}
       </div>`;
   }).join('');
 
-  return `<div class="grid-row">${photosHTML}</div>`;
+  return `<div class="grid-row">${itemsHTML}</div>`;
 }
 
-/* ── INIT ────────────────────────────────────────────────── */
+/* -- INIT --------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   applyLayoutSettings();
 });

@@ -31,7 +31,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font); font-w
 a { color: inherit; text-decoration: none; }
 img { display: block; }
 
-/* ── HEADER ──────────────────────────────────────────────── */
+/* -- HEADER ------------------------------------------------- */
 header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -49,13 +49,22 @@ nav { display: flex; gap: 22px; align-items: center; flex-shrink: 0; }
 nav a { font-weight: 700; font-size: var(--fs-nav); white-space: nowrap; }
 nav a.active { border-bottom: 1px solid var(--fg); }
 
-/* ── PAGE BODY ───────────────────────────────────────────── */
+/* -- PAGE BODY ---------------------------------------------- */
 .page-body {
   padding-top: calc(var(--header-h) + var(--content-top-margin));
   padding-bottom: 4rem;
 }
 
-/* ── TEXT COLUMN ─────────────────────────────────────────── */
+/* -- TEXT COLUMN --------------------------------------------
+ * The text column (title + intro) is rendered only when
+ * page.textColumn !== false. When absent, photos fill the
+ * full available width automatically because the flex
+ * container has no fixed-width child on the left.
+ *
+ * Per-page overrides (width, paddingRight, paddingBottom,
+ * showTitle, showIntro) are handled in _buildTextColumn()
+ * in portfolio.js and injected as inline styles.
+ */
 .text-col,
 .text-col-grid,
 .about-text {
@@ -72,7 +81,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .text-col-grid p:last-child,
 .about-text p:last-child { margin-bottom: 0; }
 
-/* ── HORIZONTAL PAGE ────────────────────────────────────────── */
+/* -- HORIZONTAL PAGE ---------------------------------------- */
 .page-row {
   display: flex;
   flex-wrap: nowrap;
@@ -95,12 +104,9 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .photos-horizontal .photo-wrap { flex: 0 0 auto; }
 .photos-horizontal .photo-wrap img {
   height: var(--photo-h);
-  /* Prevent photos from ever overflowing the viewport vertically.
-     Works on ALL devices without pointer or JS detection.
+  /* Prevent photos from overflowing the viewport vertically on all devices.
      vh fallback: subtracts 60px for browser chrome that old 100vh ignores.
-     svh (Safari 15.4+, Chrome 108+): always the minimum visible area.
-     max-height is a safety ceiling — on large desktop screens where
-     photo-h is already smaller, these have zero effect. */
+     svh (Safari 15.4+, Chrome 108+): always the minimum visible area. */
   max-height: calc(100vh  - var(--header-h) - var(--content-top-margin) - 60px);
   max-height: calc(100svh - var(--header-h) - var(--content-top-margin) - 10px);
   width: auto;
@@ -109,7 +115,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   background: #e8e8e8;
 }
 
-/* ── VERTICAL PAGE ──────────────────────────────────────────── */
+/* -- VERTICAL PAGE ------------------------------------------ */
 .page-vertical-wrap {
   display: flex;
   flex-wrap: nowrap;
@@ -130,7 +136,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   display: block;
 }
 
-/* ── GRID PAGE ──────────────────────────────────────────────── */
+/* -- GRID PAGE ---------------------------------------------- */
 .page-grid-wrap {
   display: flex;
   flex-wrap: nowrap;
@@ -153,7 +159,7 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 }
 .grid-row .grid-photo { min-width: 0; box-sizing: border-box; }
 
-/* ── SHARED ──────────────────────────────────────────────── */
+/* -- SHARED ------------------------------------------------- */
 .photo-wrap { cursor: default; }
 .photo-caption {
   font-size: var(--fs-caption);
@@ -162,12 +168,41 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   font-family: var(--mono);
 }
 
-/* ── ABOUT / INFO ────────────────────────────────────────── */
+/* -- TEXT BOX -----------------------------------------------
+ * Inline text element that lives in the photo sequence.
+ * No border, no background -- naked text on the page colour.
+ * Height matches surrounding photos via var(--photo-h)
+ * unless overridden inline (h property in config).
+ * Vertical alignment (justify-content) and padding are
+ * injected inline by buildTextBox() in portfolio.js.
+ */
+.text-box {
+  flex: 0 0 auto;          /* horizontal layout: don't stretch */
+  display: flex;
+  flex-direction: column;
+  height: var(--photo-h);  /* overridden inline if h is set per-item */
+  font-family: var(--font);
+  line-height: 1.6;
+  color: var(--fg);
+  background: transparent;
+  overflow: hidden;
+}
+.text-box-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;                /* vertical spacing between content blocks */
+}
+.text-box-block {
+  /* font-size and font-weight are set inline per block */
+}
+.text-box-block span { display: block; }
 
-/* Random quote — centered, shown below the about block */
+/* -- ABOUT / INFO ------------------------------------------- */
+
+/* Random quote -- centered, shown below the about block */
 .info-quote {
   width: 100%;
-  padding: 4rem var(--pad) 4rem;
+  padding: 4rem var(--pad);
   text-align: center;
   font-size: var(--fs-info-quote, 22px);
   line-height: 1.5;
@@ -183,108 +218,88 @@ nav a.active { border-bottom: 1px solid var(--fg); }
 .about-links { margin-top: 20px; display: flex; flex-direction: column; gap: 5px; }
 .about-links a { font-size: var(--fs-info-links); font-weight: 700; }
 
-/* ═══════════════════════════════════════════════════════════
+/* ============================================================
    RESPONSIVE
-   ─────────────────────────────────────────────────────────
+   ------------------------------------------------------------
    pointer: coarse  = touch device (phone or tablet, any size)
    pointer: fine    = desktop/laptop with mouse (not affected)
 
    Touch landscape:
-     → top margin 10px, pad 22px
-     → horizontal photos fill viewport height (via min() in base)
-     → vertical photos fill full screen width
-     → grid: text above, 2 photos per row (configurable in future)
+     -> top margin 10px, pad 22px
+     -> horizontal photos fill viewport height
+     -> vertical photos fill full screen width
+     -> grid: text above, 2 items per row
 
    Touch portrait (any size, pointer:coarse):
-     → all layouts stack, text above photos
-     → top margin 10px
+     -> all layouts stack, text column above photos
+     -> top margin 10px
 
-   Phone portrait (≤ 640px, fine-grained):
-     → 1 photo per row in grid, compact navbar
-   ═══════════════════════════════════════════════════════════ */
+   Phone portrait (<= 640px):
+     -> 1 item per row in grid, compact navbar
+   ============================================================ */
 
-/* ── Touch landscape: all phones + tablets in landscape ─── */
+/* -- Touch landscape: all phones + tablets in landscape ----- */
 @media (orientation: landscape) and (pointer: coarse) {
-  :root { --pad: 22px; }  /* margin set by JS */
+  :root { --pad: 22px; }  /* top margin set by JS */
 
-  /* Horizontal layout must not scroll vertically.
-     padding-bottom on .page-body pushes total height beyond viewport. */
+  /* Horizontal layout must not scroll vertically */
   .page-body { padding-bottom: 0; }
 
-
-  /* Horizontal photo height is handled in base CSS (min + dvh).
-     --content-top-margin: 10px above gives photos more room on coarse-pointer devices. */
-
-  /* Vertical photos: full screen width (override inline w-fraction) */
+  /* Vertical photos: full screen width */
   .photos-vertical .vertical-photo { width: 100% !important; }
-  .photos-vertical .vertical-photo img {
-    width: 100% !important;
-    height: auto !important;
-  }
+  .photos-vertical .vertical-photo img { width: 100% !important; height: auto !important; }
+  /* Vertical text boxes: full screen width */
+  .photos-vertical .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
 
-  /* Grid: text above; each row keeps its photos side-by-side, scaled to fit width */
+  /* Grid: text column above; rows stay side-by-side */
   .page-grid-wrap { flex-direction: column; }
-  .text-col-grid {
-    flex: none; width: 100%;
-    padding-right: 0; padding-bottom: 20px;
-  }
-  /* Each photo in a row shares the width equally (flex: 1 1 0) */
-  .grid-photo {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-  }
+  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
+  /* Each photo/text-box in a row shares width equally */
+  .grid-photo,
+  .grid-row .text-box { flex: 1 1 0 !important; min-width: 0 !important; }
   .grid-photo img { width: 100% !important; height: auto !important; }
+  .grid-row .text-box { width: 100% !important; }
 }
 
-/* ── Touch portrait: all phones + tablets in portrait ──────── */
+/* -- Touch portrait: all phones + tablets in portrait ------- */
 @media (orientation: portrait) and (pointer: coarse) {
-  :root { --pad: 22px; }  /* margin set by JS */
+  :root { --pad: 22px; }  /* top margin set by JS */
 
-  /* Horizontal → vertical stack */
+  /* Horizontal -> vertical stack */
   .page-row { flex-direction: column; overflow-x: visible; }
-  .text-col {
-    flex: none; width: 100%;
-    padding-right: 0; padding-bottom: 20px;
-  }
+  .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
   .photos-horizontal { flex-direction: column; width: 100%; overflow-x: visible; }
   .photos-horizontal .photo-wrap { flex: none; width: 100%; }
-  .photos-horizontal .photo-wrap img {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none;
-  }
+  .photos-horizontal .photo-wrap img { width: 100% !important; height: auto !important; max-width: none; }
+  /* Horizontal text boxes: full width, auto height */
+  .photos-horizontal .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
 
-  /* Vertical → text above, all photos full width */
+  /* Vertical -> text column above, all photos full width */
   .page-vertical-wrap { flex-direction: column; }
-  .page-vertical-wrap .text-col {
-    flex: none; width: 100%;
-    padding-right: 0; padding-bottom: 20px;
-  }
+  .page-vertical-wrap .text-col { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
   .photos-vertical .vertical-photo { width: 100% !important; }
-  .photos-vertical .vertical-photo img {
-    width: 100% !important;
-    height: auto !important;
-  }
+  .photos-vertical .vertical-photo img { width: 100% !important; height: auto !important; }
+  /* Vertical text boxes: full width */
+  .photos-vertical .text-box { width: 100% !important; height: auto !important; min-height: 80px; }
 
-  /* Grid → text above, 2 photos per row, natural ratio */
+  /* Grid -> text column above, 2 items per row */
   .page-grid-wrap { flex-direction: column; }
-  .text-col-grid {
-    flex: none; width: 100%;
-    padding-right: 0; padding-bottom: 20px;
-  }
+  .text-col-grid { flex: none; width: 100%; padding-right: 0; padding-bottom: 20px; }
   .grid-row { flex-wrap: wrap; }
-  .grid-photo {
-    flex: 0 0 calc(50% - var(--photo-gap) / 2) !important;
-    min-width: 0;
-  }
+  .grid-photo { flex: 0 0 calc(50% - var(--photo-gap) / 2) !important; min-width: 0; }
   .grid-photo img { width: 100% !important; height: auto !important; }
+  /* Grid text boxes in portrait: 50% like photos */
+  .grid-row .text-box {
+    flex: 0 0 calc(50% - var(--photo-gap) / 2) !important;
+    width: auto !important; height: auto !important; min-height: 80px;
+  }
 
   /* About */
   .about-wrap { flex-direction: column; gap: 20px; }
   .about-text { flex: none; width: 100%; padding-right: 0; }
 }
 
-/* ── Portrait ≤ 640px: phone portrait ───────────────────── */
+/* -- Portrait <= 640px: phone portrait ---------------------- */
 @media (max-width: 640px) and (orientation: portrait) {
   :root { --pad: 14px; }
 
@@ -293,12 +308,13 @@ nav a.active { border-bottom: 1px solid var(--fg); }
   nav { gap: 10px; }
   nav a { font-size: 12px; }
 
-  /* Grid: 1 photo per row */
+  /* Grid: 1 item per row */
   .grid-photo { flex: 0 0 100% !important; }
+  .grid-row .text-box { flex: 0 0 100% !important; width: auto !important; }
 }
 
-/* ── JS class: touch-landscape (all touch devices in landscape,
-   including fine-pointer like iPad + Apple Pencil that bypass
-   the pointer:coarse media query above) ─────────────────── */
+/* -- JS class: touch-landscape ------------------------------
+ * Covers fine-pointer touch devices (iPad + Apple Pencil)
+ * that bypass the pointer:coarse media query above.
+ */
 html.touch-landscape .page-body { padding-bottom: 0; }
-
